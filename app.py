@@ -1,6 +1,3 @@
-# This is our main Flask application file
-# Flask is a lightweight web framework for Python that makes it easy to build web applications
-
 from flask import Flask, render_template, request, redirect, url_for, flash
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
