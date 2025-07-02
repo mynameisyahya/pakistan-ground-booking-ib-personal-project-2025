@@ -9,6 +9,7 @@ app = Flask(__name__)
 # Create a Flask application instance
 # __name__ tells Flask where to look for templates and static files
 
+asdfasdfasdfads
 app.secret_key = 'PASSWORD'
 # Secret key is needed for flash messages and session management
 # In production, you'd use a more secure random key
