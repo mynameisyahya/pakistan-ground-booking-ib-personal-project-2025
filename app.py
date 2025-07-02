@@ -26,20 +26,44 @@ def signup_player():
     if request.method == 'POST':
         # requirments for an account
         name = request.form['name']
-        age = request.form['age']
+        age = int(request.form['age'])
         email = request.form['email']
         phone = request.form['phone']
+        if age <= 14:
+            return render_template('restriction.html')
         print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
         # Redirect to the home page after signup
         return redirect(url_for('grounds'))
     # If it's a GET request, show the signup form
     return render_template('signup_player.html')
 
-@app.route('/signup/landlord')
+@app.route('/signup/landlord', methods=['GET', 'POST'])
 def signup_landlord():
-    # This will handle landlord signup form
-    # We'll create this later
-    return "Landlord Signup Page - Coming Soon!"
+    if request.method == 'POST':
+        name = request.form.get('name')
+        age = request.form.get('age')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        ground_name = request.form.get('ground_name')
+        ground_location = request.form.get('ground_location')
+        rate = request.form.get('rate')
+        materials = request.form.getlist('materials')
+        ground_use = request.form.get('ground_use')
+        # Validation: all fields required, at least one ground location
+        errors = []
+        if not all([name, age, email, phone, ground_name, ground_location, rate, ground_use]):
+            errors.append('All fields are required.')
+        if not ground_name or not ground_location:
+            errors.append('You must list at least one ground name and location.')
+        if errors:
+            for error in errors:
+                flash(error, 'danger')
+            return render_template('signup_landlord.html')
+        # For now, just print the data (simulate saving to DB)
+        print(f"Landlord signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
+        flash('Landlord account created successfully! (Simulated)', 'success')
+        return redirect(url_for('grounds'))
+    return render_template('signup_landlord.html')
 
 @app.route('/login')
 def login():
