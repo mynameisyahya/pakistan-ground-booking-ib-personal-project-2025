@@ -37,16 +37,14 @@ def signup_player():
         age = int(request.form['age'])
         email = request.form['email']
         phone = request.form['phone']
-        password = request.form['password']
         if age <= 14:
             return render_template('restriction.html')
         print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
         players[email] = {
-            'password': generate_password_hash(password),
             'name': name,
             # ...other fields
         }
-        # Redirect to the home page after signup
+        # Redirect to the grounds page after signup
         return redirect(url_for('grounds'))
     # If it's a GET request, show the signup form
     return render_template('signup_player.html')
@@ -80,6 +78,9 @@ def signup_landlord():
             return render_template('signup_landlord.html')
         # if these things are not written it will error out
         print(f"Landlord signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
+        if passwo == None:
+            return render_template('restriction.html')
+        
         hosts[email] = {
             'password': generate_password_hash(passwo),
             'name': name,
