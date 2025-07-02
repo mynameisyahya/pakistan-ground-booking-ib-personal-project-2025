@@ -1,0 +1,14 @@
+Flask==2.3.3
+# Flask is our main web framework - it handles routing, templates, and web requests
+
+Flask-SQLAlchemy==3.0.5
+# SQLAlchemy helps us work with databases easily - we'll use this later for storing user data
+
+Flask-Login==0.6.3
+# Flask-Login handles user authentication (login/logout) - we'll use this for user sessions
+
+Werkzeug==2.3.7
+# Werkzeug provides security features like password hashing - we'll use this for secure passwords
+
+python-dotenv==1.0.0
+# python-dotenv helps us manage environment variables (like secret keys) safely 
