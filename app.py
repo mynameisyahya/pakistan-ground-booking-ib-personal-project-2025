@@ -17,8 +17,8 @@ app.secret_key = 'PASSWORD'
 def home():
     # This function handles the main homepage
     # When someone visits our website, this is what they see first
-    return render_template('home.html')
-    # render_template looks for a file called 'home.html' in the templates folder
+    return render_template('index.html')
+    # render_template looks for a file called 'index.html' in the templates folder
 
 @app.route('/signup/player', methods=['GET', 'POST'])
 def signup_player():
