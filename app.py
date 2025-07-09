@@ -338,6 +338,14 @@ def publish_ground():
         return redirect(url_for('grounds'))
     return render_template('publish_ground.html')
 
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
     app.run(debug=True)
