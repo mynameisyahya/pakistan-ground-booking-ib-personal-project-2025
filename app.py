@@ -34,19 +34,33 @@ def home():
 def signup_player():
     # This route handles both GET (show form) and POST (process form) requests
     if request.method == 'POST':
-        # requirments for an account
+        # requirements for an account
         name = request.form['name']
         age = int(request.form['age'])
         email = request.form['email']
         phone = request.form['phone']
-        password = request.form.get('password')
+        password = request.form['password']  # Now required field
+        
+        # Validate required fields
+        if not all([name, email, phone, password]):
+            flash('All fields are required.', 'danger')
+            return render_template('signup_player.html')
+            
         if age <= 14:
             return render_template('restriction.html')
+            
+        # Check if email already exists
+        if email in players:
+            flash('Email already registered. Please login or use a different email.', 'danger')
+            return render_template('signup_player.html')
+            
         print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
         players[email] = {
-            'password': generate_password_hash(password) if password else '',
+            'password': generate_password_hash(password),
             'name': name,
-            # ...other fields
+            'age': age,
+            'email': email,
+            'phone': phone
         }
         session['user_type'] = 'player'
         session['user_email'] = email
@@ -66,27 +80,40 @@ def signup_host():
         age = request.form.get('age')
         email = request.form.get('email')
         phone = request.form.get('phone')
-        passwo = request.form.get('password')
+        password = request.form.get('password')
         ground_name = request.form.get('ground_name')
         ground_location = request.form.get('ground_location')
         rate = request.form.get('rate')
         materials = request.form.getlist('materials')
         ground_use = request.form.get('ground_use')
-        errors = []
-        if not all([name, age, email, phone, passwo, ground_name, ground_location, rate, ground_use]):
-            errors.append('All fields are required.')
-        if not ground_name or not ground_location:
-            errors.append('You must list at least one ground name and location.')
-        if errors:
-            for error in errors:
-                flash(error, 'danger')
+        
+        # Validate required fields
+        if not all([name, age, email, phone, password, ground_name, ground_location, rate, ground_use]):
+            flash('All fields are required.', 'danger')
             return render_template('signup_host.html')
-        if passwo is not None:
-            hosts[email] = {
-                'password': generate_password_hash(passwo),
-                'name': name,
-                # ...other fields
-            }
+            
+        # Ensure password is not None for type safety
+        if not password:
+            flash('Password is required.', 'danger')
+            return render_template('signup_host.html')
+            
+        # Check if email already exists
+        if email in hosts:
+            flash('Email already registered. Please login or use a different email.', 'danger')
+            return render_template('signup_host.html')
+            
+        hosts[email] = {
+            'password': generate_password_hash(password),
+            'name': name,
+            'age': age,
+            'email': email,
+            'phone': phone,
+            'ground_name': ground_name,
+            'ground_location': ground_location,
+            'rate': rate,
+            'materials': materials,
+            'ground_use': ground_use
+        }
         session['user_type'] = 'host'
         session['user_email'] = email
         # List of random Unsplash images
@@ -126,10 +153,13 @@ def login_player():
         email = request.form['email']
         password = request.form['password']
         user = players.get(email)
-        if user and ('password' not in user or check_password_hash(user['password'], password)):
+        
+        # Check if user exists and password is correct
+        if user and check_password_hash(user['password'], password):
             # Login successful!
             session['user_type'] = 'player'
             session['user_email'] = email
+            flash('Login successful!', 'success')
             return redirect(url_for('grounds'))
         else:
             flash('Invalid email or password', 'danger')
@@ -142,10 +172,13 @@ def login_host():
         email = request.form['email']
         password = request.form['password']
         user = hosts.get(email)
-        if user and ('password' not in user or check_password_hash(user['password'], password)):
+        
+        # Check if user exists and password is correct
+        if user and check_password_hash(user['password'], password):
             # Login successful!
             session['user_type'] = 'host'
             session['user_email'] = email
+            flash('Login successful!', 'success')
             return redirect(url_for('grounds'))
         else:
             flash('Invalid email or password', 'danger')
