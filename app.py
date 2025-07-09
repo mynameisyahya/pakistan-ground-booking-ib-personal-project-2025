@@ -90,7 +90,8 @@ def signup_host():
         session['user_email'] = email
         print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
         flash('Host account created successfully! (Simulated)', 'success')
-        return redirect(url_for('grounds'))
+        # Redirect to the host-specific grounds page
+        return redirect(url_for('grounds_host'))
     return render_template('signup_host.html')
 
 
@@ -206,6 +207,48 @@ def grounds():
     all_grounds = static_grounds + published_grounds
     is_host = session.get('user_type') == 'host'
     return render_template('grounds.html', grounds=all_grounds, is_host=is_host)
+
+@app.route('/grounds/host')
+def grounds_host():
+    static_grounds = [
+        {
+            'id': 1,
+            'name': 'Jinnah Sports Complex',
+            'location': 'Islamabad',
+            'rate': 2000,
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 2,
+            'name': 'Karachi United Stadium',
+            'location': 'Karachi',
+            'rate': 1800,
+            'img': 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 3,
+            'name': 'Lahore Football Arena',
+            'location': 'Lahore',
+            'rate': 2200,
+            'img': 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 4,
+            'name': 'Model Town Sports Complex',
+            'location': 'Lahore',
+            'rate': 2100,
+            'img': 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 5,
+            'name': 'Punjab Stadium',
+            'location': 'Lahore',
+            'rate': 2300,
+            'img': 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80'
+        }
+    ]
+    all_grounds = static_grounds + published_grounds
+    return render_template('grounds_host.html', grounds=all_grounds)
 
 @app.route('/ground/<int:ground_id>')
 def ground_detail(ground_id):
