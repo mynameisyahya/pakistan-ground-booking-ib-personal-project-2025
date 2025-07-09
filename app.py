@@ -409,6 +409,13 @@ def not_found_error(error):
 def internal_error(error):
     return render_template('500.html'), 500
 
+@app.route('/logout')
+def logout():
+    # Clear the user session
+    session.clear()
+    flash('You have been logged out successfully.', 'success')
+    return redirect(url_for('home'))
+
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
     app.run(debug=True)

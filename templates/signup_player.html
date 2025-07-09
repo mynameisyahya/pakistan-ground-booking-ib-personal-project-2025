@@ -37,6 +37,17 @@
     </style>
 </head>
 <body>
+    <!-- Simple Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background: #667eea;">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">⚽ Football Grounds</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="{{ url_for('home') }}">Home</a>
+                <a class="nav-link" href="{{ url_for('login_player') }}">Login</a>
+            </div>
+        </div>
+    </nav>
+
     <div class="signup-form">
         <!-- This is the main signup form container -->
         <div class="form-title">Sign Up as Player</div>
