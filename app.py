@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
+import random
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
 # redirect: Sends users to different pages
@@ -88,16 +89,28 @@ def signup_host():
             }
         session['user_type'] = 'host'
         session['user_email'] = email
+        # List of random Unsplash images
+        unsplash_images = [
+            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1465378552210-88481e0b7c33?auto=format&fit=crop&w=400&q=80',
+            'https://images.unsplash.com/photo-1505843273132-bc5c6f7bfa98?auto=format&fit=crop&w=400&q=80',
+        ]
+        random_img = random.choice(unsplash_images)
         host_ground = {
             'name': ground_name,
             'location': ground_location,
             'rate': rate,
-            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+            'img': random_img,
         }
         print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
         flash('Host account created successfully! (Simulated)', 'success')
         # Redirect to the host-specific grounds page, passing the host's ground
-        return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate))
+        return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate, host_ground_img=random_img))
     return render_template('signup_host.html')
 
 
@@ -259,12 +272,13 @@ def grounds_host():
     host_ground_name = request.args.get('host_ground_name')
     host_ground_location = request.args.get('host_ground_location')
     host_ground_rate = request.args.get('host_ground_rate')
+    host_ground_img = request.args.get('host_ground_img')
     if host_ground_name and host_ground_location and host_ground_rate:
         host_ground = {
             'name': host_ground_name,
             'location': host_ground_location,
             'rate': host_ground_rate,
-            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+            'img': host_ground_img or 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
         }
         # Remove from all_grounds if present
         all_grounds = [g for g in all_grounds if not (g['name'] == host_ground_name and g['location'] == host_ground_location)]

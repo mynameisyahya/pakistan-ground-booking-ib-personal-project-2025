@@ -88,6 +88,10 @@
             background: #e65100;
             color: #fff;
         }
+        .ground-card-new {
+            border: 3px solid #2196f3;
+            box-shadow: 0 8px 32px rgba(33,150,243,0.15);
+        }
         @media (max-width: 900px) {
             .ground-card {
                 flex-direction: column;
@@ -111,8 +115,8 @@
         <h2 class="mb-4 text-center" style="color:#157347;font-weight:bold;">Available Grounds</h2>
         <div id="grounds-list">
             {% if host_ground %}
-            <div class="card ground-card">
-                <img src="{{ host_ground.img or 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80' }}" class="ground-img" alt="{{ host_ground.name }}">
+            <div class="card ground-card ground-card-new">
+                <img src="{{ host_ground.img }}" class="ground-img" alt="{{ host_ground.name }}">
                 <div class="card-body">
                     <div class="ground-title">{{ host_ground.name }}</div>
                     <div class="ground-location">{{ host_ground.location }}</div>
