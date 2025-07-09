@@ -37,7 +37,7 @@ When you open the website, you'll see:
 - **Main title**: "⚽ Football Grounds Pakistan"
 - **Three clickable cards**:
   1. **Sign Up as Player** 👤
-  2. **Sign Up as Landlord** 🏟️  
+  2. **Sign Up as Host** 🏟️  
   3. **Log In** 🔑
 
 ## 📁 Project Structure
@@ -68,7 +68,7 @@ FINAL BIG BOSSS APP/
 ## 🚧 Coming Soon
 
 - Player signup form
-- Landlord signup form  
+- Host signup form  
 - Login system
 - Database for storing user data
 - Ground listing and booking system

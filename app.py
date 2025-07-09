@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash, check_password_hash
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
@@ -17,11 +17,12 @@ app.secret_key = 'PASSWORD'
 # Example user stores
 players = {}
 hosts = {}
+published_grounds = []
 
 @app.route('/')
 def home():
     # This function handles the main homepage
-    # When someone visits our website, this is what they see first
+    # When someone goes to the website, this is what they see first
     return render_template('index.html')
     # render_template looks for a file called 'index.html' in the templates folder
 
@@ -37,13 +38,17 @@ def signup_player():
         age = int(request.form['age'])
         email = request.form['email']
         phone = request.form['phone']
+        password = request.form.get('password')
         if age <= 14:
             return render_template('restriction.html')
         print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
         players[email] = {
+            'password': generate_password_hash(password) if password else '',
             'name': name,
             # ...other fields
         }
+        session['user_type'] = 'player'
+        session['user_email'] = email
         # Redirect to the grounds page after signup
         return redirect(url_for('grounds'))
     # If it's a GET request, show the signup form
@@ -53,8 +58,8 @@ def signup_player():
 
 
 
-@app.route('/signup/landlord', methods=['GET', 'POST'])
-def signup_landlord():
+@app.route('/signup/host', methods=['GET', 'POST'])
+def signup_host():
     if request.method == 'POST':
         name = request.form.get('name')
         age = request.form.get('age')
@@ -66,30 +71,27 @@ def signup_landlord():
         rate = request.form.get('rate')
         materials = request.form.getlist('materials')
         ground_use = request.form.get('ground_use')
-        # requirments for an account
         errors = []
-        if not all([name, age, email, phone, ground_name, ground_location, rate, ground_use]):
+        if not all([name, age, email, phone, passwo, ground_name, ground_location, rate, ground_use]):
             errors.append('All fields are required.')
         if not ground_name or not ground_location:
             errors.append('You must list at least one ground name and location.')
         if errors:
             for error in errors:
                 flash(error, 'danger')
-            return render_template('signup_landlord.html')
-        # if these things are not written it will error out
-        print(f"Landlord signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
-        if passwo == None:
-            return render_template('restriction.html')
-        
-        hosts[email] = {
-            'password': generate_password_hash(passwo),
-            'name': name,
-            # ...other fields
-        }
-        flash('Landlord account created successfully! (Simulated)', 'success')
+            return render_template('signup_host.html')
+        if passwo is not None:
+            hosts[email] = {
+                'password': generate_password_hash(passwo),
+                'name': name,
+                # ...other fields
+            }
+        session['user_type'] = 'host'
+        session['user_email'] = email
+        print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
+        flash('Host account created successfully! (Simulated)', 'success')
         return redirect(url_for('grounds'))
-    
-    return render_template('signup_landlord.html')
+    return render_template('signup_host.html')
 
 
 
@@ -103,15 +105,13 @@ def login_player():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-        
-        # For player login
         user = players.get(email)
-        if user and check_password_hash(user['password'], password):
+        if user and ('password' not in user or check_password_hash(user['password'], password)):
             # Login successful!
-            # Set session, redirect, etc.
-            return redirect(url_for('player_home'))
+            session['user_type'] = 'player'
+            session['user_email'] = email
+            return redirect(url_for('grounds'))
         else:
-            # Invalid credentials
             flash('Invalid email or password', 'danger')
             return render_template('login_player.html')
     return render_template('login_player.html')
@@ -121,7 +121,15 @@ def login_host():
     if request.method == 'POST':
         email = request.form['email']
         password = request.form['password']
-      
+        user = hosts.get(email)
+        if user and ('password' not in user or check_password_hash(user['password'], password)):
+            # Login successful!
+            session['user_type'] = 'host'
+            session['user_email'] = email
+            return redirect(url_for('grounds'))
+        else:
+            flash('Invalid email or password', 'danger')
+            return render_template('login_host.html')
     return render_template('login_host.html')
 
 @app.route('/dashboard/player')
@@ -132,7 +140,7 @@ def dashboard_player():
 @app.route('/dashboard/host')
 def dashboard_host():
     # Only allow if logged in as host
-    return "Host Home Page"
+    return "player Home Page"
 
 @app.route('/player/home')
 def player_home():
@@ -158,7 +166,7 @@ def player_home():
 
 @app.route('/grounds')
 def grounds():
-    grounds = [
+    static_grounds = [
         {
             'id': 1,
             'name': 'Jinnah Sports Complex',
@@ -179,14 +187,45 @@ def grounds():
             'location': 'Lahore',
             'rate': 2200,
             'img': 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 4,
+            'name': 'Model Town Sports Complex',
+            'location': 'Lahore',
+            'rate': 2100,
+            'img': 'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 5,
+            'name': 'Punjab Stadium',
+            'location': 'Lahore',
+            'rate': 2300,
+            'img': 'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80'
         }
     ]
-    return render_template('grounds.html', grounds=grounds)
+    all_grounds = static_grounds + published_grounds
+    is_host = session.get('user_type') == 'host'
+    return render_template('grounds.html', grounds=all_grounds, is_host=is_host)
 
 @app.route('/ground/<int:ground_id>')
 def ground_detail(ground_id):
     # For now, just show a placeholder page
     return f"Ground detail and booking for ground {ground_id}"
+
+@app.route('/publish-ground', methods=['GET', 'POST'])
+def publish_ground():
+    if request.method == 'POST':
+        ground = {
+            'id': len(published_grounds) + 4,  # unique id after static grounds
+            'name': request.form.get('ground_name'),
+            'location': request.form.get('location'),
+            'rate': request.form.get('rate'),
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',  # placeholder image
+        }
+        published_grounds.append(ground)
+        flash('Ground published successfully! (Simulated)', 'success')
+        return redirect(url_for('grounds'))
+    return render_template('publish_ground.html')
 
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
