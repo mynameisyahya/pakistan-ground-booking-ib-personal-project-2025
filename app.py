@@ -88,10 +88,16 @@ def signup_host():
             }
         session['user_type'] = 'host'
         session['user_email'] = email
+        host_ground = {
+            'name': ground_name,
+            'location': ground_location,
+            'rate': rate,
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+        }
         print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
         flash('Host account created successfully! (Simulated)', 'success')
-        # Redirect to the host-specific grounds page
-        return redirect(url_for('grounds_host'))
+        # Redirect to the host-specific grounds page, passing the host's ground
+        return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate))
     return render_template('signup_host.html')
 
 
@@ -248,7 +254,21 @@ def grounds_host():
         }
     ]
     all_grounds = static_grounds + published_grounds
-    return render_template('grounds_host.html', grounds=all_grounds)
+    # Get host ground from query params if present
+    host_ground = None
+    host_ground_name = request.args.get('host_ground_name')
+    host_ground_location = request.args.get('host_ground_location')
+    host_ground_rate = request.args.get('host_ground_rate')
+    if host_ground_name and host_ground_location and host_ground_rate:
+        host_ground = {
+            'name': host_ground_name,
+            'location': host_ground_location,
+            'rate': host_ground_rate,
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+        }
+        # Remove from all_grounds if present
+        all_grounds = [g for g in all_grounds if not (g['name'] == host_ground_name and g['location'] == host_ground_location)]
+    return render_template('grounds_host.html', grounds=all_grounds, host_ground=host_ground)
 
 @app.route('/ground/<int:ground_id>')
 def ground_detail(ground_id):
