@@ -34,39 +34,56 @@ def home():
 def signup_player():
     # This route handles both GET (show form) and POST (process form) requests
     if request.method == 'POST':
-        # requirements for an account
-        name = request.form['name']
-        age = int(request.form['age'])
-        email = request.form['email']
-        phone = request.form['phone']
-        password = request.form['password']  # Now required field
-        
-        # Validate required fields
-        if not all([name, email, phone, password]):
-            flash('All fields are required.', 'danger')
+        try:
+            # requirements for an account
+            name = request.form['name']
+            age = int(request.form['age'])
+            email = request.form['email']
+            phone = request.form['phone']
+            password = request.form['password']  # Now required field
+            
+            # Validate required fields
+            if not all([name, email, phone, password]):
+                flash('All fields are required.', 'danger')
+                return render_template('signup_player.html')
+                
+            # Validate age
+            if age <= 14:
+                return render_template('restriction.html')
+            if age > 120:  # Reasonable upper limit
+                flash('Please enter a valid age.', 'danger')
+                return render_template('signup_player.html')
+                
+            # Check if email already exists
+            if email in players:
+                flash('Email already registered. Please login or use a different email.', 'danger')
+                return render_template('signup_player.html')
+                
+            print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
+            players[email] = {
+                'password': generate_password_hash(password),
+                'name': name,
+                'age': age,
+                'email': email,
+                'phone': phone
+            }
+            session['user_type'] = 'player'
+            session['user_email'] = email
+            flash('Account created successfully! Welcome!', 'success')
+            # Redirect to the grounds page after signup
+            return redirect(url_for('grounds'))
+            
+        except ValueError:
+            flash('Please enter a valid age (numbers only).', 'danger')
+            return render_template('signup_player.html')
+        except KeyError as e:
+            flash(f'Missing required field: {str(e)}', 'danger')
+            return render_template('signup_player.html')
+        except Exception as e:
+            flash('An error occurred during signup. Please try again.', 'danger')
+            print(f"Player signup error: {e}")
             return render_template('signup_player.html')
             
-        if age <= 14:
-            return render_template('restriction.html')
-            
-        # Check if email already exists
-        if email in players:
-            flash('Email already registered. Please login or use a different email.', 'danger')
-            return render_template('signup_player.html')
-            
-        print(f"Player signup: Name={name}, Age={age}, Email={email}, Phone={phone}")
-        players[email] = {
-            'password': generate_password_hash(password),
-            'name': name,
-            'age': age,
-            'email': email,
-            'phone': phone
-        }
-        session['user_type'] = 'player'
-        session['user_email'] = email
-        flash('Account created successfully! Welcome!', 'success')
-        # Redirect to the grounds page after signup
-        return redirect(url_for('grounds'))
     # If it's a GET request, show the signup form
     return render_template('signup_player.html')
 
@@ -77,68 +94,98 @@ def signup_player():
 @app.route('/signup/host', methods=['GET', 'POST'])
 def signup_host():
     if request.method == 'POST':
-        name = request.form.get('name')
-        age = request.form.get('age')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        password = request.form.get('password')
-        ground_name = request.form.get('ground_name')
-        ground_location = request.form.get('ground_location')
-        rate = request.form.get('rate')
-        materials = request.form.getlist('materials')
-        ground_use = request.form.get('ground_use')
-        
-        # Validate required fields
-        if not all([name, age, email, phone, password, ground_name, ground_location, rate, ground_use]):
-            flash('All fields are required.', 'danger')
+        try:
+            name = request.form.get('name')
+            age = request.form.get('age')
+            email = request.form.get('email')
+            phone = request.form.get('phone')
+            password = request.form.get('password')
+            ground_name = request.form.get('ground_name')
+            ground_location = request.form.get('ground_location')
+            rate = request.form.get('rate')
+            materials = request.form.getlist('materials')
+            ground_use = request.form.get('ground_use')
+            
+            # Validate required fields
+            if not all([name, age, email, phone, password, ground_name, ground_location, rate, ground_use]):
+                flash('All fields are required.', 'danger')
+                return render_template('signup_host.html')
+                
+            # Ensure password is not None for type safety
+            if not password:
+                flash('Password is required.', 'danger')
+                return render_template('signup_host.html')
+                
+            # Validate age
+            try:
+                age_int = int(age)
+                if age_int <= 14:
+                    flash('You must be at least 15 years old to register as a host.', 'danger')
+                    return render_template('signup_host.html')
+                if age_int > 120:
+                    flash('Please enter a valid age.', 'danger')
+                    return render_template('signup_host.html')
+            except ValueError:
+                flash('Please enter a valid age (numbers only).', 'danger')
+                return render_template('signup_host.html')
+                
+            # Validate rate
+            try:
+                rate_int = int(rate)
+                if rate_int < 0:
+                    flash('Rate must be a positive number.', 'danger')
+                    return render_template('signup_host.html')
+            except ValueError:
+                flash('Please enter a valid rate (numbers only).', 'danger')
+                return render_template('signup_host.html')
+                
+            # Check if email already exists
+            if email in hosts:
+                flash('Email already registered. Please login or use a different email.', 'danger')
+                return render_template('signup_host.html')
+                
+            hosts[email] = {
+                'password': generate_password_hash(password),
+                'name': name,
+                'age': age_int,
+                'email': email,
+                'phone': phone,
+                'ground_name': ground_name,
+                'ground_location': ground_location,
+                'rate': rate_int,
+                'materials': materials,
+                'ground_use': ground_use
+            }
+            session['user_type'] = 'host'
+            session['user_email'] = email
+            # List of random Unsplash images
+            unsplash_images = [
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1465378552210-88481e0b7c33?auto=format&fit=crop&w=400&q=80',
+                'https://images.unsplash.com/photo-1505843273132-bc5c6f7bfa98?auto=format&fit=crop&w=400&q=80',
+            ]
+            random_img = random.choice(unsplash_images)
+            host_ground = {
+                'name': ground_name,
+                'location': ground_location,
+                'rate': rate_int,
+                'img': random_img,
+            }
+            print(f"Host signup: Name={name}, Age={age_int}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate_int}, Materials={materials}, Use={ground_use}")
+            flash('Host account created successfully! Welcome!', 'success')
+            # Redirect to the host-specific grounds page, passing the host's ground
+            return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate_int, host_ground_img=random_img))
+            
+        except Exception as e:
+            flash('An error occurred during signup. Please try again.', 'danger')
+            print(f"Host signup error: {e}")
             return render_template('signup_host.html')
             
-        # Ensure password is not None for type safety
-        if not password:
-            flash('Password is required.', 'danger')
-            return render_template('signup_host.html')
-            
-        # Check if email already exists
-        if email in hosts:
-            flash('Email already registered. Please login or use a different email.', 'danger')
-            return render_template('signup_host.html')
-            
-        hosts[email] = {
-            'password': generate_password_hash(password),
-            'name': name,
-            'age': age,
-            'email': email,
-            'phone': phone,
-            'ground_name': ground_name,
-            'ground_location': ground_location,
-            'rate': rate,
-            'materials': materials,
-            'ground_use': ground_use
-        }
-        session['user_type'] = 'host'
-        session['user_email'] = email
-        # List of random Unsplash images
-        unsplash_images = [
-            'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1518098268026-4e89f1a2cd8e?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1465378552210-88481e0b7c33?auto=format&fit=crop&w=400&q=80',
-            'https://images.unsplash.com/photo-1505843273132-bc5c6f7bfa98?auto=format&fit=crop&w=400&q=80',
-        ]
-        random_img = random.choice(unsplash_images)
-        host_ground = {
-            'name': ground_name,
-            'location': ground_location,
-            'rate': rate,
-            'img': random_img,
-        }
-        print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
-        flash('Host account created successfully! Welcome!', 'success')
-        # Redirect to the host-specific grounds page, passing the host's ground
-        return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate, host_ground_img=random_img))
     return render_template('signup_host.html')
 
 
@@ -151,38 +198,54 @@ def login():
 @app.route('/login/player', methods=['GET', 'POST'])
 def login_player():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user = players.get(email)
-        
-        # Check if user exists and password is correct
-        if user and check_password_hash(user['password'], password):
-            # Login successful!
-            session['user_type'] = 'player'
-            session['user_email'] = email
-            flash('Login successful!', 'success')
-            return redirect(url_for('grounds'))
-        else:
-            flash('Invalid email or password', 'danger')
+        try:
+            email = request.form['email']
+            password = request.form['password']
+            user = players.get(email)
+            
+            # Check if user exists and password is correct
+            if user and check_password_hash(user['password'], password):
+                # Login successful!
+                session['user_type'] = 'player'
+                session['user_email'] = email
+                flash('Login successful!', 'success')
+                return redirect(url_for('grounds'))
+            else:
+                flash('Invalid email or password', 'danger')
+                return render_template('login_player.html')
+        except KeyError as e:
+            flash(f'Missing required field: {str(e)}', 'danger')
+            return render_template('login_player.html')
+        except Exception as e:
+            flash('An error occurred during login. Please try again.', 'danger')
+            print(f"Player login error: {e}")
             return render_template('login_player.html')
     return render_template('login_player.html')
 
 @app.route('/login/host', methods=['GET', 'POST'])
 def login_host():
     if request.method == 'POST':
-        email = request.form['email']
-        password = request.form['password']
-        user = hosts.get(email)
-        
-        # Check if user exists and password is correct
-        if user and check_password_hash(user['password'], password):
-            # Login successful!
-            session['user_type'] = 'host'
-            session['user_email'] = email
-            flash('Login successful!', 'success')
-            return redirect(url_for('grounds'))
-        else:
-            flash('Invalid email or password', 'danger')
+        try:
+            email = request.form['email']
+            password = request.form['password']
+            user = hosts.get(email)
+            
+            # Check if user exists and password is correct
+            if user and check_password_hash(user['password'], password):
+                # Login successful!
+                session['user_type'] = 'host'
+                session['user_email'] = email
+                flash('Login successful!', 'success')
+                return redirect(url_for('grounds'))
+            else:
+                flash('Invalid email or password', 'danger')
+                return render_template('login_host.html')
+        except KeyError as e:
+            flash(f'Missing required field: {str(e)}', 'danger')
+            return render_template('login_host.html')
+        except Exception as e:
+            flash('An error occurred during login. Please try again.', 'danger')
+            print(f"Host login error: {e}")
             return render_template('login_host.html')
     return render_template('login_host.html')
 
