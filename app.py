@@ -64,6 +64,7 @@ def signup_player():
         }
         session['user_type'] = 'player'
         session['user_email'] = email
+        flash('Account created successfully! Welcome!', 'success')
         # Redirect to the grounds page after signup
         return redirect(url_for('grounds'))
     # If it's a GET request, show the signup form
@@ -135,7 +136,7 @@ def signup_host():
             'img': random_img,
         }
         print(f"Host signup: Name={name}, Age={age}, Email={email}, Phone={phone}, Ground Name={ground_name}, Location={ground_location}, Rate={rate}, Materials={materials}, Use={ground_use}")
-        flash('Host account created successfully! (Simulated)', 'success')
+        flash('Host account created successfully! Welcome!', 'success')
         # Redirect to the host-specific grounds page, passing the host's ground
         return redirect(url_for('grounds_host', host_ground_name=ground_name, host_ground_location=ground_location, host_ground_rate=rate, host_ground_img=random_img))
     return render_template('signup_host.html')

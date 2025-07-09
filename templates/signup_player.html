@@ -41,6 +41,19 @@
         <!-- This is the main signup form container -->
         <div class="form-title">Sign Up as Player</div>
         <!-- Main heading -->
+        
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
         <form method="POST">
             <!-- The form uses POST to send data securely to the server -->
             <div class="mb-3">
