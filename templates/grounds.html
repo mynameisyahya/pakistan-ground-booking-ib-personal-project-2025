@@ -1,136 +1,101 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Available Grounds - Football Grounds Pakistan</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        body {
-            min-height: 100vh;
-            height: 100vh;
-            background: #fff;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            flex-direction: column;
-        }
-        .ground-list-section {
-            padding: 40px 0 40px 0;
-            width: 100vw;
-            min-height: 100vh;
-        }
+{% extends "base.html" %}
+
+{% block title %}Available Grounds - Football Grounds Pakistan{% endblock %}
+
+{% block breadcrumbs %}
+<div class="container mt-3">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{{ url_for('home') }}">Home</a></li>
+            <li class="breadcrumb-item active">Available Grounds</li>
+        </ol>
+    </nav>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .ground-list-section {
+        padding: 40px 0 40px 0;
+        width: 100vw;
+        min-height: 100vh;
+    }
+    .ground-card {
+        width: 96vw;
+        max-width: 1200px;
+        margin: 40px auto;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 24px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.06);
+        background: #fff;
+        display: flex;
+        flex-direction: row;
+        overflow: hidden;
+        min-height: 320px;
+        transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .ground-card:hover {
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+        border-color: #bdbdbd;
+    }
+    .ground-img {
+        width: 50vw;
+        max-width: 500px;
+        height: 320px;
+        object-fit: cover;
+        border-radius: 24px 0 0 24px;
+        flex-shrink: 0;
+        background: #f5f5f5;
+    }
+    .card-body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 36px 28px;
+        width: 100%;
+    }
+    .ground-title {
+        color: #222;
+        font-size: 2rem;
+        font-weight: bold;
+    }
+    .ground-location {
+        color: #666;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+    }
+    .ground-rate {
+        color: #fff;
+        background: #157347;
+        border-radius: 8px;
+        padding: 8px 18px;
+        font-size: 1.1rem;
+        font-weight: bold;
+        display: inline-block;
+        margin-top: 18px;
+    }
+    @media (max-width: 900px) {
         .ground-card {
-            width: 96vw;
-            max-width: 1200px;
-            margin: 40px auto;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 24px;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.06);
-            background: #fff;
-            display: flex;
-            flex-direction: row;
-            overflow: hidden;
-            min-height: 320px;
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-        .ground-card:hover {
-            box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-            border-color: #bdbdbd;
+            flex-direction: column;
+            width: 98vw;
+            min-height: 0;
+            border-radius: 16px;
         }
         .ground-img {
-            width: 50vw;
-            max-width: 500px;
-            height: 320px;
-            object-fit: cover;
-            border-radius: 24px 0 0 24px;
-            flex-shrink: 0;
-            background: #f5f5f5;
+            width: 100%;
+            height: 180px;
+            border-radius: 16px 16px 0 0;
         }
         .card-body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 36px 28px;
-            width: 100%;
+            padding: 20px 10px;
         }
-        .ground-title {
-            color: #222;
-            font-size: 2rem;
-            font-weight: bold;
-        }
-        .ground-location {
-            color: #666;
-            font-size: 1.1rem;
-            margin-bottom: 10px;
-        }
-        .ground-rate {
-            color: #fff;
-            background: #157347;
-            border-radius: 8px;
-            padding: 8px 18px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 18px;
-        }
-        @media (max-width: 900px) {
-            .ground-card {
-                flex-direction: column;
-                width: 98vw;
-                min-height: 0;
-                border-radius: 16px;
-            }
-            .ground-img {
-                width: 100%;
-                height: 180px;
-                border-radius: 16px 16px 0 0;
-            }
-            .card-body {
-                padding: 20px 10px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background: #157347;">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('home') }}">⚽ Football Grounds</a>
-            <div class="navbar-nav ms-auto">
-                {% if session.get('user_type') %}
-                    <span class="navbar-text me-3">
-                        Welcome, {{ session.get('user_email', 'User') }}!
-                    </span>
-                    <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
-                {% else %}
-                    <a class="nav-link" href="{{ url_for('login') }}">Login</a>
-                    <a class="nav-link" href="{{ url_for('home') }}">Sign Up</a>
-                {% endif %}
-            </div>
-        </div>
-    </nav>
+    }
+</style>
+{% endblock %}
 
-    <div class="ground-list-section">
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="container mt-3">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                        </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-        
-        <h2 class="mb-4 text-center" style="color:#157347;font-weight:bold;">Available Grounds</h2>
+{% block content %}
+<div class="ground-list-section">
+    <h2 class="mb-4 text-center" style="color:#157347;font-weight:bold;">Available Grounds</h2>
         <div id="grounds-list">
             <div class="card ground-card">
                 <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Jinnah Sports Complex">
@@ -179,6 +144,4 @@
             </div>
         </div>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+{% endblock %} 
