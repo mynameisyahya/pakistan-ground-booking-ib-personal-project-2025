@@ -109,7 +109,7 @@ def login_player():
         if user and check_password_hash(user['password'], password):
             # Login successful!
             # Set session, redirect, etc.
-            return redirect(url_for('dashboard_player'))
+            return redirect(url_for('player_home'))
         else:
             # Invalid credentials
             flash('Invalid email or password', 'danger')
@@ -134,9 +134,59 @@ def dashboard_host():
     # Only allow if logged in as host
     return "Host Home Page"
 
+@app.route('/player/home')
+def player_home():
+    # Example static data for MVP
+    grounds = [
+        {
+            'id': 1,
+            'name': 'Jinnah Sports Complex',
+            'location': 'Islamabad',
+            'rate': 2000,
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 2,
+            'name': 'Karachi United Stadium',
+            'location': 'Karachi',
+            'rate': 1800,
+            'img': 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'
+        },
+        # Add more grounds as needed
+    ]
+    return render_template('player_home.html', grounds=grounds)
+
 @app.route('/grounds')
 def grounds():
-    return "Grounds page coming soon!"
+    grounds = [
+        {
+            'id': 1,
+            'name': 'Jinnah Sports Complex',
+            'location': 'Islamabad',
+            'rate': 2000,
+            'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 2,
+            'name': 'Karachi United Stadium',
+            'location': 'Karachi',
+            'rate': 1800,
+            'img': 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'
+        },
+        {
+            'id': 3,
+            'name': 'Lahore Football Arena',
+            'location': 'Lahore',
+            'rate': 2200,
+            'img': 'https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80'
+        }
+    ]
+    return render_template('grounds.html', grounds=grounds)
+
+@app.route('/ground/<int:ground_id>')
+def ground_detail(ground_id):
+    # For now, just show a placeholder page
+    return f"Ground detail and booking for ground {ground_id}"
 
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
