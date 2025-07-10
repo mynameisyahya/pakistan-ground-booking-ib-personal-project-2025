@@ -3,6 +3,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import random
 from flask_sqlalchemy import SQLAlchemy
 import os
+from markupsafe import escape
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
 # redirect: Sends users to different pages
@@ -118,10 +119,10 @@ def signup_player():
     if request.method == 'POST':
         try:
             # requirements for an account
-            name = request.form['name']
+            name = escape(request.form['name'].strip())
             age = int(request.form['age'])
-            email = request.form['email']
-            phone = request.form['phone']
+            email = escape(request.form['email'].strip())
+            phone = escape(request.form['phone'].strip())
             password = request.form['password']  # Now required field
             
             # Validate required fields
@@ -177,16 +178,16 @@ def signup_player():
 def signup_host():
     if request.method == 'POST':
         try:
-            name = request.form.get('name')
+            name = escape(request.form.get('name', '').strip())
             age = request.form.get('age')
-            email = request.form.get('email')
-            phone = request.form.get('phone')
+            email = escape(request.form.get('email', '').strip())
+            phone = escape(request.form.get('phone', '').strip())
             password = request.form.get('password')
-            ground_name = request.form.get('ground_name')
-            ground_location = request.form.get('ground_location')
+            ground_name = escape(request.form.get('ground_name', '').strip())
+            ground_location = escape(request.form.get('ground_location', '').strip())
             rate = request.form.get('rate')
-            materials = request.form.getlist('materials')
-            ground_use = request.form.get('ground_use')
+            materials = [escape(m.strip()) for m in request.form.getlist('materials')]
+            ground_use = escape(request.form.get('ground_use', '').strip())
 
             # Validate required fields
             if not all([name, age, email, phone, password, ground_name, ground_location, rate, ground_use]):
@@ -383,13 +384,13 @@ def ground_detail(ground_id):
 def publish_ground():
     if request.method == 'POST':
         # Add new ground to the database (unpublished by default)
-        name = request.form.get('ground_name')
-        location = request.form.get('location')
+        name = escape(request.form.get('ground_name', '').strip())
+        location = escape(request.form.get('location', '').strip())
         rate = request.form.get('rate')
         img = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'  # placeholder image
-        host_email = session.get('user_email', 'demo@host.com')
-        materials = request.form.get('materials', '')
-        ground_use = request.form.get('ground_use', '')
+        host_email = escape(session.get('user_email', 'demo@host.com').strip())
+        materials = escape(request.form.get('materials', '').strip())
+        ground_use = escape(request.form.get('ground_use', '').strip())
         new_ground = Ground(
             name=name,
             location=location,
