@@ -111,8 +111,9 @@
 {% block content %}
 <div class="ground-list-section">
     <h2 class="mb-4 text-center" style="color:#157347;font-weight:bold;">My Grounds</h2>
-        <div id="grounds-list">
-            {% if host_ground %}
+    <div id="grounds-list">
+        {# If the host just added a new ground, show it at the top as a special card #}
+        {% if host_ground %}
             <div class="card ground-card ground-card-new">
                 <img src="{{ host_ground.img }}" class="ground-img" alt="{{ host_ground.name }}">
                 <div class="card-body">
@@ -122,23 +123,30 @@
                     <div class="d-flex gap-2 mt-4">
                         <a href="#" class="btn btn-success w-100">View & Book</a>
                         <a href="#" class="btn btn-secondary w-100">Edit</a>
-                        <a href="#" class="btn btn-publish w-100">Publish</a>
+                        <form method="POST" action="{{ url_for('publish_ground_action', ground_id=host_ground.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-publish w-100">Publish</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            {% endif %}
-            <!-- Other grounds -->
+        {% endif %}
+        {# Loop through all grounds and display them dynamically #}
+        {% if grounds %}
             {% for ground in grounds %}
-            <div class="card ground-card">
-                <img src="{{ ground.img }}" class="ground-img" alt="{{ ground.name }}">
-                <div class="card-body">
-                    <div class="ground-title">{{ ground.name }}</div>
-                    <div class="ground-location">{{ ground.location }}</div>
-                    <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
+                <div class="card ground-card">
+                    <img src="{{ ground.img }}" class="ground-img" alt="{{ ground.name }}">
+                    <div class="card-body">
+                        <div class="ground-title">{{ ground.name }}</div>
+                        <div class="ground-location">{{ ground.location }}</div>
+                        <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
+                        <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
+                    </div>
                 </div>
-            </div>
             {% endfor %}
-        </div>
+        {% else %}
+            {# Show a message if there are no grounds available #}
+            <div class="text-center text-muted">No grounds available at the moment.</div>
+        {% endif %}
     </div>
+</div>
 {% endblock %} 

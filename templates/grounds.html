@@ -96,52 +96,30 @@
 {% block content %}
 <div class="ground-list-section">
     <h2 class="mb-4 text-center" style="color:#157347;font-weight:bold;">Available Grounds</h2>
-        <div id="grounds-list">
-            <div class="card ground-card">
-                <img src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Jinnah Sports Complex">
-                <div class="card-body">
-                    <div class="ground-title">Jinnah Sports Complex</div>
-                    <div class="ground-location">Islamabad</div>
-                    <div class="ground-rate">Rs 2000/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
+    <div id="grounds-list">
+        {# Check if there are any grounds to display #}
+        {% if grounds %}
+            {# Loop through each ground in the grounds list #}
+            {% for ground in grounds %}
+                <div class="card ground-card">
+                    {# Display the ground's image #}
+                    <img src="{{ ground.img }}" class="ground-img" alt="{{ ground.name }}">
+                    <div class="card-body">
+                        {# Display the ground's name #}
+                        <div class="ground-title">{{ ground.name }}</div>
+                        {# Display the ground's location #}
+                        <div class="ground-location">{{ ground.location }}</div>
+                        {# Display the ground's rate per hour #}
+                        <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
+                        {# Button to view and book the ground (link to be implemented) #}
+                        <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
+                    </div>
                 </div>
-            </div>
-            <div class="card ground-card">
-                <img src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Karachi United Stadium">
-                <div class="card-body">
-                    <div class="ground-title">Karachi United Stadium</div>
-                    <div class="ground-location">Karachi</div>
-                    <div class="ground-rate">Rs 1800/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
-                </div>
-            </div>
-            <div class="card ground-card">
-                <img src="https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Lahore Football Arena">
-                <div class="card-body">
-                    <div class="ground-title">Lahore Football Arena</div>
-                    <div class="ground-location">Lahore</div>
-                    <div class="ground-rate">Rs 2200/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
-                </div>
-            </div>
-            <div class="card ground-card">
-                <img src="https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Model Town Sports Complex">
-                <div class="card-body">
-                    <div class="ground-title">Model Town Sports Complex</div>
-                    <div class="ground-location">Lahore</div>
-                    <div class="ground-rate">Rs 2100/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
-                </div>
-            </div>
-            <div class="card ground-card">
-                <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=400&q=80" class="ground-img" alt="Punjab Stadium">
-                <div class="card-body">
-                    <div class="ground-title">Punjab Stadium</div>
-                    <div class="ground-location">Lahore</div>
-                    <div class="ground-rate">Rs 2300/hour</div>
-                    <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
-                </div>
-            </div>
-        </div>
+            {% endfor %}
+        {% else %}
+            {# Show a message if there are no grounds available #}
+            <div class="text-center text-muted">No grounds available at the moment.</div>
+        {% endif %}
     </div>
+</div>
 {% endblock %} 
