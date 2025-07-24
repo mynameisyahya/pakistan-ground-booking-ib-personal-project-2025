@@ -112,7 +112,7 @@
                         {# Display the ground's rate per hour #}
                         <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
                         {# Button to view and book the ground (link to be implemented) #}
-                        <a href="#" class="btn btn-success mt-4 w-100">View & Book</a>
+                        <a href="{{ url_for('final_booking') }}" class="btn btn-success mt-4 w-100">View & Book</a>
                     </div>
                 </div>
             {% endfor %}

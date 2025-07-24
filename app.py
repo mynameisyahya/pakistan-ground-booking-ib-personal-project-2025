@@ -407,6 +407,17 @@ def publish_ground():
         return redirect(url_for('grounds_host'))
     return render_template('publish_ground.html')
 
+@app.route('/final-booking', methods=['GET', 'POST'])
+def final_booking():
+    if request.method == 'POST':
+        date = request.form.get('date')
+        start_time = request.form.get('start_time')
+        end_time = request.form.get('end_time')
+        # For now, just flash a message. You can add booking logic later.
+        flash(f'Booking requested for {date} from {start_time} to {end_time}.', 'success')
+        return render_template('final_booking.html')
+    return render_template('final_booking.html')
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
