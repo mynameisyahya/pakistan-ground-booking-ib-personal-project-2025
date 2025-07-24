@@ -7,6 +7,13 @@
 </head>
 <body>
     <div class="container mt-5">
+        {% if ground %}
+        <div class="mb-4">
+            <h4>{{ ground.name }}</h4>
+            <div><strong>Location:</strong> {{ ground.location }}</div>
+            <div><strong>Rate:</strong> Rs {{ ground.rate }}/hour</div>
+        </div>
+        {% endif %}
         <h2>Book Your Ground</h2>
         <form method="POST">
             <div class="mb-3">

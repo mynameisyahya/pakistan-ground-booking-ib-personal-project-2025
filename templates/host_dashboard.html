@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Host Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Booking Requests
+        {% if pending_count > 0 %}
+            <span class="badge bg-danger">{{ pending_count }} Pending</span>
+        {% endif %}
+    </h2>
+    {% if bookings %}
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Ground</th>
+                    <th>Player Email</th>
+                    <th>Date</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>{{ host_grounds|selectattr('id', 'equalto', booking.ground_id)|first.name }}</td>
+                    <td>{{ booking.player_email }}</td>
+                    <td>{{ booking.date }}</td>
+                    <td>{{ booking.start_time }}</td>
+                    <td>{{ booking.end_time }}</td>
+                    <td>
+                        {% if booking.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif booking.status == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Declined</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if booking.status == 'pending' %}
+                        <form method="POST" action="{{ url_for('approve_booking', booking_id=booking.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('decline_booking', booking_id=booking.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                        </form>
+                        {% else %}
+                            <span class="text-muted">No actions</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info mt-4">No booking requests yet.</div>
+    {% endif %}
+</div>
+{% endblock %} 

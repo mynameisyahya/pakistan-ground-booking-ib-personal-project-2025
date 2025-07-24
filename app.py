@@ -407,16 +407,31 @@ def publish_ground():
         return redirect(url_for('grounds_host'))
     return render_template('publish_ground.html')
 
-@app.route('/final-booking', methods=['GET', 'POST'])
-def final_booking():
+@app.route('/final-booking/<int:ground_id>', methods=['GET', 'POST'])
+def final_booking(ground_id):
+    ground = Ground.query.get_or_404(ground_id)
     if request.method == 'POST':
         date = request.form.get('date')
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
-        # For now, just flash a message. You can add booking logic later.
-        flash(f'Booking requested for {date} from {start_time} to {end_time}.', 'success')
-        return render_template('final_booking.html')
-    return render_template('final_booking.html')
+        player_email = session.get('user_email')
+        if not player_email:
+            flash('You must be logged in as a player to book.', 'danger')
+            return redirect(url_for('login_player'))
+        # Create booking request
+        booking = Booking(
+            ground_id=ground.id,
+            player_email=player_email,
+            date=date,
+            start_time=start_time,
+            end_time=end_time,
+            status='pending'
+        )
+        db.session.add(booking)
+        db.session.commit()
+        flash('Booking request sent to the host!', 'success')
+        return redirect(url_for('player_dashboard'))
+    return render_template('final_booking.html', ground=ground)
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -432,6 +447,71 @@ def logout():
     session.clear()
     flash('You have been logged out successfully.', 'success')
     return redirect(url_for('home'))
+
+class Booking(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ground_id = db.Column(db.Integer, db.ForeignKey('ground.id'), nullable=False)
+    player_email = db.Column(db.String(120), nullable=False)
+    date = db.Column(db.String(20), nullable=False)
+    start_time = db.Column(db.String(10), nullable=False)
+    end_time = db.Column(db.String(10), nullable=False)
+    status = db.Column(db.String(20), default='pending')  # pending, approved, declined
+
+# Ensure all tables are created automatically
+with app.app_context():
+    db.create_all()
+
+@app.route('/host/dashboard', methods=['GET', 'POST'])
+def host_dashboard():
+    if 'user_email' not in session or session.get('user_type') != 'host':
+        flash('You must be logged in as a host to view this page.', 'danger')
+        return redirect(url_for('login_host'))
+    host_email = session['user_email']
+    # Get all grounds owned by this host
+    host_grounds = Ground.query.filter_by(host_email=host_email).all()
+    ground_ids = [g.id for g in host_grounds]
+    # Get all bookings for these grounds
+    bookings = Booking.query.filter(Booking.ground_id.in_(ground_ids)).order_by(Booking.id.desc()).all()
+    # Notification: count of pending requests
+    pending_count = sum(1 for b in bookings if b.status == 'pending')
+    return render_template('host_dashboard.html', bookings=bookings, host_grounds=host_grounds, pending_count=pending_count)
+
+@app.route('/booking/<int:booking_id>/approve', methods=['POST'])
+def approve_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    # Only the host of the ground can approve
+    ground = Ground.query.get(booking.ground_id)
+    if session.get('user_email') != ground.host_email:
+        flash('You do not have permission to approve this booking.', 'danger')
+        return redirect(url_for('host_dashboard'))
+    booking.status = 'approved'
+    db.session.commit()
+    flash('Booking approved.', 'success')
+    return redirect(url_for('host_dashboard'))
+
+@app.route('/booking/<int:booking_id>/decline', methods=['POST'])
+def decline_booking(booking_id):
+    booking = Booking.query.get_or_404(booking_id)
+    ground = Ground.query.get(booking.ground_id)
+    if session.get('user_email') != ground.host_email:
+        flash('You do not have permission to decline this booking.', 'danger')
+        return redirect(url_for('host_dashboard'))
+    booking.status = 'declined'
+    db.session.commit()
+    flash('Booking declined.', 'success')
+    return redirect(url_for('host_dashboard'))
+
+@app.route('/player/dashboard')
+def player_dashboard():
+    if 'user_email' not in session or session.get('user_type') != 'player':
+        flash('You must be logged in as a player to view this page.', 'danger')
+        return redirect(url_for('login_player'))
+    player_email = session['user_email']
+    bookings = Booking.query.filter_by(player_email=player_email).order_by(Booking.id.desc()).all()
+    # Get all grounds for display
+    ground_ids = [b.ground_id for b in bookings]
+    grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
+    return render_template('player_dashboard.html', bookings=bookings, grounds=grounds)
 
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
