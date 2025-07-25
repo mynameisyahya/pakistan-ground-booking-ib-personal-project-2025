@@ -240,6 +240,14 @@ def signup_host():
             )
             db.session.add(new_ground)
             db.session.commit()
+            # Add host to hosts dictionary for login
+            hosts[email] = {
+                'password': generate_password_hash(password),
+                'name': name,
+                'age': int(age),
+                'email': email,
+                'phone': phone
+            }
             flash('Host account created! Preview your ground before publishing.', 'success')
             return redirect(url_for('grounds_host'))
         except Exception as e:

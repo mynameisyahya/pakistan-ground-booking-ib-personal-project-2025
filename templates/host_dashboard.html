@@ -25,7 +25,7 @@
             <tbody>
                 {% for booking in bookings %}
                 <tr>
-                    <td>{{ host_grounds|selectattr('id', 'equalto', booking.ground_id)|first.name }}</td>
+                    <td>{{ (host_grounds|selectattr('id', 'equalto', booking.ground_id)|first).name }}</td>
                     <td>{{ booking.player_email }}</td>
                     <td>{{ booking.date }}</td>
                     <td>{{ booking.start_time }}</td>
