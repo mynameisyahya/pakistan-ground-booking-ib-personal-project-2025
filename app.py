@@ -521,6 +521,17 @@ def player_dashboard():
     grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
     return render_template('player_dashboard.html', bookings=bookings, grounds=grounds)
 
+@app.route('/player/requests')
+def player_requests():
+    if 'user_email' not in session or session.get('user_type') != 'player':
+        flash('You must be logged in as a player to view this page.', 'danger')
+        return redirect(url_for('login_player'))
+    player_email = session['user_email']
+    bookings = Booking.query.filter_by(player_email=player_email).order_by(Booking.id.desc()).all()
+    ground_ids = [b.ground_id for b in bookings]
+    grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
+    return render_template('player_requests.html', bookings=bookings, grounds=grounds)
+
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly
     app.run(debug=True)

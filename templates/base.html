@@ -65,6 +65,11 @@
                                 <a class="nav-link" href="{{ url_for('host_dashboard') }}">Host Dashboard</a>
                             </li>
                         {% endif %}
+                        {% if session.get('user_type') == 'player' %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('player_requests') }}">Requests</a>
+                            </li>
+                        {% endif %}
                     {% endif %}
                 </ul>
                 
