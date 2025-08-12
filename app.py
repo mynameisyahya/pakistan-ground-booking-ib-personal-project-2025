@@ -36,6 +36,30 @@ class Ground(db.Model):
     materials = db.Column(db.String(300), nullable=True)  # Comma-separated list
     ground_use = db.Column(db.String(50), nullable=True)
 
+# Persistent users for players/hosts with age stored
+class User(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    name = db.Column(db.String(120), nullable=True)
+    age = db.Column(db.Integer, nullable=True)
+    user_type = db.Column(db.String(20), nullable=False)  # 'player' or 'host'
+
+# Match pool per ground/date/time
+class Match(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    ground_id = db.Column(db.Integer, db.ForeignKey('ground.id'), nullable=False)
+    date = db.Column(db.String(20), nullable=False)
+    time = db.Column(db.String(10), nullable=False)
+    status = db.Column(db.String(20), default='waiting')  # waiting, pending_host, confirmed, declined
+    host_email = db.Column(db.String(120), nullable=False)
+
+# Players in a match with optional team assignment
+class MatchPlayer(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    match_id = db.Column(db.Integer, db.ForeignKey('match.id'), nullable=False)
+    user_email = db.Column(db.String(120), nullable=False)
+    team = db.Column(db.String(1), nullable=True)  # 'A' or 'B'
+
 # Create the database and tables if they don't exist
 if not os.path.exists('grounds.db'):
     with app.app_context():
@@ -103,6 +127,23 @@ with app.app_context():
 players = {}
 hosts = {}
 
+def get_or_create_user_from_session():
+    email = session.get('user_email')
+    user_type = session.get('user_type')
+    if not email or not user_type:
+        return None
+    user = User.query.filter_by(email=email).first()
+    if user:
+        return user
+    # Bootstrap from in-memory stores
+    source = players.get(email) if user_type == 'player' else hosts.get(email)
+    name = source.get('name') if source else None
+    age = source.get('age') if source else None
+    user = User(email=email, name=name, age=age, user_type=user_type)
+    db.session.add(user)
+    db.session.commit()
+    return user
+
 @app.route('/')
 def home():
     # This function handles the main homepage
@@ -150,6 +191,10 @@ def signup_player():
                 'email': email,
                 'phone': phone
             }
+            # persist as User
+            if not User.query.filter_by(email=email).first():
+                db.session.add(User(email=email, name=name, age=age, user_type='player'))
+                db.session.commit()
             session['user_type'] = 'player'
             session['user_email'] = email
             flash('Account created successfully! Welcome!', 'success')
@@ -248,6 +293,9 @@ def signup_host():
                 'email': email,
                 'phone': phone
             }
+            if not User.query.filter_by(email=email).first():
+                db.session.add(User(email=email, name=name, age=int(age), user_type='host'))
+                db.session.commit()
             flash('Host account created! Preview your ground before publishing.', 'success')
             return redirect(url_for('grounds_host'))
         except Exception as e:
@@ -288,6 +336,7 @@ def login_player():
                 # Login successful!
                 session['user_type'] = 'player'
                 session['user_email'] = email
+                get_or_create_user_from_session()
                 flash('Login successful!', 'success')
                 return redirect(url_for('grounds'))
             else:
@@ -315,6 +364,7 @@ def login_host():
                 # Login successful!
                 session['user_type'] = 'host'
                 session['user_email'] = email
+                get_or_create_user_from_session()
                 flash('Login successful!', 'success')
                 return redirect(url_for('grounds'))
             else:
@@ -364,9 +414,10 @@ def player_home():
 @app.route('/grounds')
 def grounds():
     # Show only published grounds to all users
-    grounds = Ground.query.filter_by(published=True).all()
+    grounds_list = Ground.query.filter_by(published=True).all()
     is_host = session.get('user_type') == 'host'
-    return render_template('grounds.html', grounds=grounds, is_host=is_host)
+    is_player = session.get('user_type') == 'player'
+    return render_template('grounds.html', grounds=grounds_list, is_host=is_host, is_player=is_player)
 
 @app.route('/grounds/host')
 def grounds_host():
@@ -441,6 +492,180 @@ def final_booking(ground_id):
         return redirect(url_for('player_dashboard'))
     return render_template('final_booking.html', ground=ground)
 
+# ---------------------- Join Match Flow ----------------------
+
+def _balance_teams_median_based10(player_emails_with_age):
+    if len(player_emails_with_age) != 10:
+        return None, None
+    sorted_players = sorted(player_emails_with_age, key=lambda x: x[1])
+    pairs = []
+    for i in range(5):
+        pairs.append((sorted_players[i], sorted_players[-(i+1)]))
+    random.shuffle(pairs)
+    team_a, team_b = [], []
+    for idx, pair in enumerate(pairs):
+        a, b = pair
+        if random.random() < 0.5:
+            first, second = a, b
+        else:
+            first, second = b, a
+        if idx % 2 == 0:
+            team_a.append(first[0])
+            team_b.append(second[0])
+        else:
+            team_b.append(first[0])
+            team_a.append(second[0])
+    return team_a, team_b
+
+@app.route('/join_match/<int:ground_id>', methods=['POST'])
+def join_match(ground_id):
+    if 'user_email' not in session or session.get('user_type') != 'player':
+        flash('You must be logged in as a player to join a match.', 'danger')
+        return redirect(url_for('login_player'))
+    date = request.form.get('date')
+    time = request.form.get('time')
+    if not date or not time:
+        flash('Please provide both date and time.', 'danger')
+        return redirect(url_for('grounds'))
+    ground = Ground.query.get_or_404(ground_id)
+    player = get_or_create_user_from_session()
+    if player is None or player.age is None:
+        flash('Your profile age is missing. Please update your age.', 'danger')
+        return redirect(url_for('grounds'))
+    match = Match.query.filter_by(ground_id=ground.id, date=date, time=time).first()
+    if match is None:
+        match = Match(ground_id=ground.id, date=date, time=time, status='waiting', host_email=ground.host_email)
+        db.session.add(match)
+        db.session.commit()
+    if match.status in ['pending_host', 'confirmed']:
+        flash('This match is already under review or confirmed. Try another slot.', 'danger')
+        return redirect(url_for('grounds'))
+    existing = MatchPlayer.query.filter_by(match_id=match.id, user_email=player.email).first()
+    if existing:
+        flash('You are already in this match pool.', 'success')
+        return redirect(url_for('grounds'))
+    current_count = MatchPlayer.query.filter_by(match_id=match.id).count()
+    if current_count >= 10:
+        flash('This match pool is full.', 'danger')
+        return redirect(url_for('grounds'))
+    db.session.add(MatchPlayer(match_id=match.id, user_email=player.email))
+    db.session.commit()
+    current_players = MatchPlayer.query.filter_by(match_id=match.id).all()
+    if len(current_players) == 10:
+        emails = [mp.user_email for mp in current_players]
+        users = {u.email: u for u in User.query.filter(User.email.in_(emails)).all()}
+        if any((users.get(e) is None) or (users[e].age is None) for e in emails):
+            flash('One or more players missing age; cannot form teams yet.', 'danger')
+            return redirect(url_for('grounds'))
+        players_with_ages = [(e, users[e].age) for e in emails]
+        team_a_emails, team_b_emails = _balance_teams_median_based10(players_with_ages)
+        if not team_a_emails or not team_b_emails:
+            flash('Could not form teams. Please try again.', 'danger')
+            return redirect(url_for('grounds'))
+        for mp in current_players:
+            mp.team = 'A' if mp.user_email in team_a_emails else 'B'
+        match.status = 'pending_host'
+        db.session.commit()
+        flash('Teams formed and sent to host for approval!', 'success')
+    else:
+        flash(f'Joined match pool. Waiting for {10 - len(current_players)} more players.', 'success')
+    return redirect(url_for('grounds'))
+
+@app.route('/match/<int:match_id>/accept', methods=['POST'])
+def accept_match(match_id):
+    match = Match.query.get_or_404(match_id)
+    ground = Ground.query.get(match.ground_id)
+    if session.get('user_email') != ground.host_email or session.get('user_type') != 'host':
+        flash('You do not have permission to accept this match.', 'danger')
+        return redirect(url_for('host_dashboard'))
+    match.status = 'confirmed'
+    db.session.commit()
+    flash('Match confirmed.', 'success')
+    return redirect(url_for('host_dashboard'))
+
+@app.route('/match/<int:match_id>/decline', methods=['POST'])
+def decline_match(match_id):
+    match = Match.query.get_or_404(match_id)
+    ground = Ground.query.get(match.ground_id)
+    if session.get('user_email') != ground.host_email or session.get('user_type') != 'host':
+        flash('You do not have permission to decline this match.', 'danger')
+        return redirect(url_for('host_dashboard'))
+    match.status = 'waiting'  # keep pool, allow later approval
+    db.session.commit()
+    flash('Match declined. Players remain in the waiting pool.', 'success')
+    return redirect(url_for('host_dashboard'))
+
+# ---------------------- Dev/Test Utilities (debug only) ----------------------
+@app.route('/dev/fill_match/<int:ground_id>', methods=['POST', 'GET'])
+def dev_fill_match(ground_id):
+    # Guard for debug mode only
+    if not app.debug:
+        flash('Dev utility is only available in debug mode.', 'danger')
+        return redirect(url_for('grounds'))
+    date = request.values.get('date')
+    time = request.values.get('time')
+    if not date or not time:
+        flash('Provide date and time parameters.', 'danger')
+        return redirect(url_for('grounds'))
+    ground = Ground.query.get_or_404(ground_id)
+    match = Match.query.filter_by(ground_id=ground.id, date=date, time=time).first()
+    if match is None:
+        match = Match(ground_id=ground.id, date=date, time=time, status='waiting', host_email=ground.host_email)
+        db.session.add(match)
+        db.session.commit()
+    current_players = MatchPlayer.query.filter_by(match_id=match.id).all()
+    remaining = 10 - len(current_players)
+    for i in range(max(0, remaining)):
+        email = f"bot{i}_{ground.id}_{date}_{time}@example.com"
+        user = User.query.filter_by(email=email).first()
+        if not user:
+            user = User(email=email, name=f"Bot {i}", age=random.randint(16, 45), user_type='player')
+            db.session.add(user)
+            db.session.commit()
+        if not MatchPlayer.query.filter_by(match_id=match.id, user_email=email).first():
+            db.session.add(MatchPlayer(match_id=match.id, user_email=email))
+    db.session.commit()
+    # If full, assign teams and mark pending_host
+    current_players = MatchPlayer.query.filter_by(match_id=match.id).all()
+    if len(current_players) == 10:
+        emails = [mp.user_email for mp in current_players]
+        users = {u.email: u for u in User.query.filter(User.email.in_(emails)).all()}
+        players_with_ages = [(e, users[e].age) for e in emails]
+        team_a_emails, team_b_emails = _balance_teams_median_based10(players_with_ages)
+        if team_a_emails and team_b_emails:
+            for mp in current_players:
+                mp.team = 'A' if mp.user_email in team_a_emails else 'B'
+            match.status = 'pending_host'
+            db.session.commit()
+            flash('Filled match with bots and sent to host for approval.', 'success')
+        else:
+            flash('Could not assign teams.', 'danger')
+    else:
+        flash('Added bots to the pool. Not yet at 10.', 'success')
+    return redirect(url_for('grounds'))
+
+@app.route('/dev/become_host', methods=['GET', 'POST'])
+def dev_become_host():
+    if not app.debug:
+        flash('Dev utility is only available in debug mode.', 'danger')
+        return redirect(url_for('grounds'))
+    host_email = request.values.get('host_email')
+    if not host_email:
+        flash('Provide host_email parameter.', 'danger')
+        return redirect(url_for('grounds'))
+    # Ensure a host user exists
+    user = User.query.filter_by(email=host_email).first()
+    if not user:
+        user = User(email=host_email, name='Dev Host', age=25, user_type='host')
+        db.session.add(user)
+        db.session.commit()
+    # Also make login feasible via in-memory dict for other flows
+    hosts[host_email] = hosts.get(host_email, {'password': generate_password_hash('devpass'), 'name': 'Dev Host', 'age': 25, 'email': host_email, 'phone': ''})
+    session['user_type'] = 'host'
+    session['user_email'] = host_email
+    flash(f'Impersonating host {host_email}', 'success')
+    return redirect(url_for('host_dashboard'))
+
 @app.errorhandler(404)
 def not_found_error(error):
     return render_template('404.html'), 404
@@ -482,7 +707,12 @@ def host_dashboard():
     bookings = Booking.query.filter(Booking.ground_id.in_(ground_ids)).order_by(Booking.id.desc()).all()
     # Notification: count of pending requests
     pending_count = sum(1 for b in bookings if b.status == 'pending')
-    return render_template('host_dashboard.html', bookings=bookings, host_grounds=host_grounds, pending_count=pending_count)
+    # Pending matches needing approval
+    pending_matches = Match.query.filter(Match.ground_id.in_(ground_ids), Match.status == 'pending_host').order_by(Match.id.desc()).all()
+    match_players_map = {}
+    for m in pending_matches:
+        match_players_map[m.id] = MatchPlayer.query.filter_by(match_id=m.id).all()
+    return render_template('host_dashboard.html', bookings=bookings, host_grounds=host_grounds, pending_count=pending_count, pending_matches=pending_matches, match_players_map=match_players_map)
 
 @app.route('/booking/<int:booking_id>/approve', methods=['POST'])
 def approve_booking(booking_id):
@@ -518,8 +748,15 @@ def player_dashboard():
     bookings = Booking.query.filter_by(player_email=player_email).order_by(Booking.id.desc()).all()
     # Get all grounds for display
     ground_ids = [b.ground_id for b in bookings]
-    grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
-    return render_template('player_dashboard.html', bookings=bookings, grounds=grounds)
+    grounds_by_id = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
+    # Joined matches
+    mps = MatchPlayer.query.filter_by(user_email=player_email).all()
+    match_ids = [mp.match_id for mp in mps]
+    matches = {m.id: m for m in Match.query.filter(Match.id.in_(match_ids)).order_by(Match.id.desc()).all()} if match_ids else {}
+    match_team_by_id = {mp.match_id: mp.team for mp in mps}
+    mg_ids = list({m.ground_id for m in matches.values()}) if matches else []
+    match_grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(mg_ids)).all()} if mg_ids else {}
+    return render_template('player_dashboard.html', bookings=bookings, grounds=grounds_by_id, matches=matches, match_team_by_id=match_team_by_id, match_grounds=match_grounds)
 
 @app.route('/player/requests')
 def player_requests():
@@ -529,8 +766,8 @@ def player_requests():
     player_email = session['user_email']
     bookings = Booking.query.filter_by(player_email=player_email).order_by(Booking.id.desc()).all()
     ground_ids = [b.ground_id for b in bookings]
-    grounds = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
-    return render_template('player_requests.html', bookings=bookings, grounds=grounds)
+    grounds_by_id = {g.id: g for g in Ground.query.filter(Ground.id.in_(ground_ids)).all()}
+    return render_template('player_requests.html', bookings=bookings, grounds=grounds_by_id)
 
 if __name__ == '__main__':
     # This runs our Flask app when we execute this file directly

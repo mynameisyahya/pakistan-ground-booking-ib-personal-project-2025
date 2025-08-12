@@ -58,5 +58,50 @@
     {% else %}
         <div class="alert alert-info mt-4">No booking requests yet.</div>
     {% endif %}
+
+    <hr class="my-5">
+    <h2>Matches Awaiting Approval</h2>
+    {% if pending_matches %}
+        <div class="list-group mt-3">
+            {% for m in pending_matches %}
+            <div class="list-group-item">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div><strong>Ground:</strong> {{ (host_grounds|selectattr('id', 'equalto', m.ground_id)|first).name }}</div>
+                        <div class="text-muted">{{ m.date }} at {{ m.time }} — Status: {{ m.status }}</div>
+                    </div>
+                    <div>
+                        <form method="POST" action="{{ url_for('accept_match', match_id=m.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-success btn-sm">Accept</button>
+                        </form>
+                        <form method="POST" action="{{ url_for('decline_match', match_id=m.id) }}" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Decline</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6>Team A</h6>
+                        <ul class="mb-0">
+                            {% for mp in match_players_map[m.id] if mp.team == 'A' %}
+                                <li>{{ mp.user_email }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Team B</h6>
+                        <ul class="mb-0">
+                            {% for mp in match_players_map[m.id] if mp.team == 'B' %}
+                                <li>{{ mp.user_email }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-3">No matches are awaiting approval.</div>
+    {% endif %}
 </div>
 {% endblock %} 

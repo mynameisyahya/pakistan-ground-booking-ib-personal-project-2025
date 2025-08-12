@@ -41,5 +41,46 @@
     {% else %}
         <div class="alert alert-info mt-4">You have not made any booking requests yet.</div>
     {% endif %}
+
+    <hr class="my-5">
+    <h2>My Matches</h2>
+    {% if matches %}
+        <table class="table table-bordered mt-4">
+            <thead>
+                <tr>
+                    <th>Ground</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Your Team</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for mid, m in matches.items() %}
+                <tr>
+                    <td>{{ match_grounds[m.ground_id].name if match_grounds.get(m.ground_id) else m.ground_id }}</td>
+                    <td>{{ m.date }}</td>
+                    <td>{{ m.time }}</td>
+                    <td>{{ match_team_by_id.get(mid) or '-' }}</td>
+                    <td>
+                        {% if m.status == 'waiting' %}
+                            <span class="badge bg-warning text-dark">Waiting</span>
+                        {% elif m.status == 'pending_host' %}
+                            <span class="badge bg-info text-dark">Pending Host</span>
+                        {% elif m.status == 'confirmed' %}
+                            <span class="badge bg-success">Confirmed</span>
+                        {% elif m.status == 'declined' %}
+                            <span class="badge bg-danger">Declined</span>
+                        {% else %}
+                            <span class="badge bg-secondary">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="alert alert-info mt-4">You haven't joined any matches yet.</div>
+    {% endif %}
 </div>
 {% endblock %} 

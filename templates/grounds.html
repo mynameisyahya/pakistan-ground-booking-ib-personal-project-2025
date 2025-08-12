@@ -111,10 +111,43 @@
                         <div class="ground-location">{{ ground.location }}</div>
                         {# Display the ground's rate per hour #}
                         <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
-                        {# Button to view and book the ground (link to be implemented) #}
+                        {# Button to view and book the ground #}
                         <a href="{{ url_for('final_booking', ground_id=ground.id) }}" class="btn btn-success mt-4 w-100">View & Book</a>
+                        {% if is_player %}
+                        <button class="btn btn-primary mt-2 w-100" data-bs-toggle="modal" data-bs-target="#joinMatchModal{{ ground.id }}">Join Match</button>
+                        {% endif %}
                     </div>
                 </div>
+                {% if is_player %}
+                <!-- Join Match Modal for this ground -->
+                <div class="modal fade" id="joinMatchModal{{ ground.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Join Match - {{ ground.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <form method="POST" action="{{ url_for('join_match', ground_id=ground.id) }}">
+                        <div class="modal-body">
+                          <div class="mb-3">
+                            <label for="date{{ ground.id }}" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="date{{ ground.id }}" name="date" required>
+                          </div>
+                          <div class="mb-3">
+                            <label for="time{{ ground.id }}" class="form-label">Time</label>
+                            <input type="time" class="form-control" id="time{{ ground.id }}" name="time" required>
+                          </div>
+                          <div class="text-muted small">You'll be added to the waiting pool for this ground, date and time. Once 10 players join, teams are formed using median-based balancing and sent to the host.</div>
+                        </div>
+                        <div class="modal-footer">
+                          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                          <button type="submit" class="btn btn-primary">Join Match</button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                </div>
+                {% endif %}
             {% endfor %}
         {% else %}
             {# Show a message if there are no grounds available #}
