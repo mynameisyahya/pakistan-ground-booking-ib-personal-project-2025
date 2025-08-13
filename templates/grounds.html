@@ -367,13 +367,12 @@
             setTimeout(function(){
               ball.classList.add('out');
               setTimeout(function(){
-                slot.innerHTML='';
                 var card=h('div','tv-card');
-          var img=avatarImg(stateByGround[groundId], player);
+                var img=avatarImg(stateByGround[groundId], player);
                 var meta=h('div','', [ h('div','tv-name',[player.name || player.email || 'Player']), h('div','tv-age',['Age: ' + (player.age ?? '-')]) ]);
                 card.appendChild(img); card.appendChild(meta);
                 if(player.team){ card.appendChild(h('span','tv-badge',['Team '+player.team])); }
-                slot.appendChild(card);
+                slot.replaceWith(card);
                 requestAnimationFrame(function(){ card.classList.add('show'); });
               }, 200);
             }, delay);
@@ -432,14 +431,13 @@
         flyer.style.transition='transform .85s ease, opacity .85s ease';
         flyer.style.transform='translate('+dx+'px,'+dy+'px)';
         setTimeout(function(){
-          // replace slot with final card
-          slot.innerHTML='';
+          // replace slot with final card (avoid double boxes)
           var cardEl=h('div','tv-card show');
-          var img=avatarImg(stateByGround[groundId]||{}, p);
+          var img=avatarImg(stateByGround[groundId], p);
           var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
           cardEl.appendChild(img); cardEl.appendChild(meta);
           if(p.team){ cardEl.appendChild(h('span','tv-badge',['Team '+p.team])); }
-          slot.appendChild(cardEl);
+          slot.replaceWith(cardEl);
           flyer.style.opacity='0';
           setTimeout(function(){ flyer.remove(); moveOne(i+1); }, 125);
         }, 480);
