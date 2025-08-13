@@ -497,27 +497,70 @@ def final_booking(ground_id):
 # ---------------------- Join Match Flow ----------------------
 
 def _balance_teams_median_based10(player_emails_with_age):
+    """Greedy median-based team balancing for exactly 10 players.
+    Steps:
+    1) Sort ascending by age
+    2) Iterate; assign current player to the team whose current median age is lower
+       (tie-break by alternating or random), while keeping size <= 5 for each team
+    """
     if len(player_emails_with_age) != 10:
         return None, None
-    sorted_players = sorted(player_emails_with_age, key=lambda x: x[1])
-    pairs = []
-    for i in range(5):
-        pairs.append((sorted_players[i], sorted_players[-(i+1)]))
-    random.shuffle(pairs)
-    team_a, team_b = [], []
-    for idx, pair in enumerate(pairs):
-        a, b = pair
-        if random.random() < 0.5:
-            first, second = a, b
+
+    players_sorted = sorted(player_emails_with_age, key=lambda x: x[1])
+    team_a_emails, team_b_emails = [], []
+    team_a_ages, team_b_ages = [], []
+    toggle = 0  # tie-break alternator
+
+    def median(values):
+        if not values:
+            return None
+        n = len(values)
+        mid = n // 2
+        if n % 2 == 1:
+            return values[mid]
+        return (values[mid - 1] + values[mid]) / 2
+
+    for email, age in players_sorted:
+        # Ensure team sizes stay within 5
+        if len(team_a_emails) >= 5:
+            team_b_emails.append(email)
+            team_b_ages.append(age)
+            continue
+        if len(team_b_emails) >= 5:
+            team_a_emails.append(email)
+            team_a_ages.append(age)
+            continue
+
+        med_a = median(team_a_ages)
+        med_b = median(team_b_ages)
+        if med_a is None and med_b is None:
+            # Seed teams: put first on A, second on B
+            if toggle % 2 == 0:
+                team_a_emails.append(email); team_a_ages.append(age)
+            else:
+                team_b_emails.append(email); team_b_ages.append(age)
+            toggle += 1
+            continue
+        if med_a is None:
+            team_a_emails.append(email); team_a_ages.append(age)
+            continue
+        if med_b is None:
+            team_b_emails.append(email); team_b_ages.append(age)
+            continue
+
+        if med_a < med_b:
+            team_a_emails.append(email); team_a_ages.append(age)
+        elif med_b < med_a:
+            team_b_emails.append(email); team_b_ages.append(age)
         else:
-            first, second = b, a
-        if idx % 2 == 0:
-            team_a.append(first[0])
-            team_b.append(second[0])
-        else:
-            team_b.append(first[0])
-            team_a.append(second[0])
-    return team_a, team_b
+            # Equal medians: alternate
+            if toggle % 2 == 0:
+                team_a_emails.append(email); team_a_ages.append(age)
+            else:
+                team_b_emails.append(email); team_b_ages.append(age)
+            toggle += 1
+
+    return team_a_emails, team_b_emails
 
 @app.route('/join_match/<int:ground_id>', methods=['POST'])
 def join_match(ground_id):

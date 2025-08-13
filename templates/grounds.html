@@ -207,8 +207,10 @@
       .tv-count{font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#e9ecef}
       .tv-progress{height:12px;background:#222;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
       .tv-progress > div{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
-      .tv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
-      @media(min-width:768px){.tv-grid{grid-template-columns:repeat(3,1fr)}}
+      .tv-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:12px;margin-top:12px;align-items:start}
+      .tv-divider{width:1px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05));height:100%;min-height:120px;border-radius:999px}
+      .tv-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+      @media(min-width:768px){.tv-col{grid-template-columns:1fr 1fr}}
       .tv-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));backdrop-filter:blur(6px);opacity:0;transform:translateY(10px) scale(.98);transition:opacity .35s ease, transform .35s ease, box-shadow .2s ease}
       .tv-card.show{opacity:1;transform:translateY(0) scale(1);box-shadow:0 6px 20px rgba(0,0,0,.35)}
       .tv-img{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.4)}
@@ -217,6 +219,7 @@
       .tv-skeleton{height:68px;border-radius:14px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));background-size:200% 100%;animation:tv-shimmer 1.2s infinite}
       @keyframes tv-shimmer{0%{background-position:0% 0}100%{background-position:-200% 0}}
       .tv-badge{margin-left:auto;font-size:.72rem;padding:.2rem .5rem;border-radius:999px;background:#1f2937;color:#e5e7eb;border:1px solid rgba(255,255,255,.08)}
+      .tv-team-title{font-weight:800;letter-spacing:.02em;margin-bottom:8px;color:#e9ecef}
       `;
       var s=document.createElement('style'); s.innerHTML=css; document.head.appendChild(s);
     }
@@ -228,25 +231,37 @@
       container.appendChild(countWrap); container.appendChild(barOuter);
       requestAnimationFrame(function(){ bar.style.width=((data.count/(data.capacity||10))*100)+'%'; });
       var grid=h('div','tv-grid');
-      // skeleton placeholders to fill up to capacity for a lively view
+      var colA=h('div','tv-col');
+      var colB=h('div','tv-col');
+      var divider=h('div','tv-divider');
       var players=(data.players||[]);
       var capacity=(data.capacity||10);
-      var totalSlots=Math.max(players.length, capacity);
-      for(var i=0;i<totalSlots;i++){
-        if(i<players.length){
-          var p=players[i];
-          var card=h('div','tv-card');
-          var img=h('img','tv-img'); img.src=p.profile_image_url || 'https://via.placeholder.com/80';
-          var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
-          card.appendChild(img); card.appendChild(meta);
-          if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
-          grid.appendChild(card);
-          (function(card,idx){ setTimeout(function(){ card.classList.add('show'); }, 40*idx); })(card,i);
-        } else {
-          // empty slot skeleton to show room to grow
-          grid.appendChild(h('div','tv-skeleton'));
-        }
-      }
+
+      // Titles
+      colA.appendChild(h('div','tv-team-title',['Team A']));
+      colB.appendChild(h('div','tv-team-title',['Team B']));
+
+      // Allocate cards to A/B based on team label; if none yet, put into A until 5 then B
+      var aCount=0,bCount=0;
+      players.forEach(function(p, idx){
+        var card=h('div','tv-card');
+        var img=h('img','tv-img'); img.src=p.profile_image_url || 'https://via.placeholder.com/80';
+        var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
+        card.appendChild(img); card.appendChild(meta);
+        if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
+        var target = p.team === 'B' ? colB : (p.team === 'A' ? colA : (aCount < 5 ? colA : colB));
+        target.appendChild(card);
+        if(target===colA) aCount++; else bCount++;
+        (function(card,delay){ setTimeout(function(){ card.classList.add('show'); }, delay); })(card, 40*idx);
+      });
+
+      // Fill skeletons up to 5 per side for balanced look
+      for(var i=aCount;i<5;i++){ colA.appendChild(h('div','tv-skeleton')); }
+      for(var j=bCount;j<5;j++){ colB.appendChild(h('div','tv-skeleton')); }
+
+      grid.appendChild(colA);
+      grid.appendChild(divider);
+      grid.appendChild(colB);
       container.appendChild(grid);
     }
     function getDateTime(groundId){
