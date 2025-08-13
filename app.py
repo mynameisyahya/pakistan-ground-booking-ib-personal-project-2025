@@ -148,10 +148,21 @@ def get_or_create_user_from_session():
 
 @app.route('/')
 def home():
-    # This function handles the main homepage
-    # When someone goes to the website, this is what they see first
-    return render_template('index.html')
-    # render_template looks for a file called 'index.html' in the templates folder
+    # Modern home: show recent/ongoing matches as the focal point
+    # No login wall here; join will prompt login if needed via backend redirect
+    recent_matches = Match.query.order_by(Match.id.desc()).limit(12).all() if 'Match' in globals() else []
+    # Build simple DTOs
+    cards = []
+    for m in recent_matches:
+        g = Ground.query.get(m.ground_id)
+        count = MatchPlayer.query.filter_by(match_id=m.id).count()
+        cards.append({
+            'match': m,
+            'ground': g,
+            'count': count,
+            'capacity': 10
+        })
+    return render_template('index.html', lobby_cards=cards)
 
 
 

@@ -1,248 +1,80 @@
-<!DOCTYPE html>
-<!-- This tells the browser this is an HTML5 document -->
+{% extends "base.html" %}
 
-<html lang="en">
-<!-- html tag starts our webpage, lang="en" tells browsers this is in English -->
+{% block title %}PlayNow - Find a game{% endblock %}
 
-<head>
-    <!-- Head contains metadata about our webpage -->
-    <meta charset="UTF-8">
-    <!-- UTF-8 ensures proper display of special characters -->
-    
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Makes the website responsive on mobile devices -->
-    
-    <title>Football Grounds Pakistan</title>
-    <!-- This is the title that appears in the browser tab -->
-    
-    <!-- Bootstrap CSS - This gives us pre-made beautiful styles -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Custom CSS for our own styling -->
-    <style>
-        body {
-            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
-            /* Creates a beautiful gradient background from green to light green */
-            min-height: 100vh;
-            /* Makes the background cover the full screen height */
-            font-family: 'Arial', sans-serif;
-            /* Sets a nice font for our text */
-        }
-        
-        .hero-section {
-            /* This styles our main content area */
-            padding: 60px 0 30px 0;
-            /* Adds space above and below our content */
-            text-align: center;
-            /* Centers all text and buttons */
-        }
-        
-        .hero-title {
-            /* Styles our main heading */
-            color: #fff;
-            /* Makes the text white */
-            font-size: 3.5rem;
-            /* Makes the text large and prominent */
-            font-weight: bold;
-            /* Makes the text bold */
-            margin-bottom: 20px;
-            /* Adds space below the title */
-            text-shadow: 2px 2px 8px rgba(0,64,0,0.2);
-            /* Adds a subtle shadow to make text stand out */
-        }
-        
-        .hero-subtitle {
-            /* Styles our subtitle */
-            color: rgba(255,255,255,0.95);
-            /* Makes text slightly transparent white */
-            font-size: 1.3rem;
-            /* Medium-sized text */
-            margin-bottom: 40px;
-            /* Adds space below subtitle */
-        }
-        
-        .ground-list-section {
-            background: rgba(255,255,255,0.95);
-            border-radius: 20px;
-            padding: 30px 20px;
-            margin-bottom: 40px;
-            box-shadow: 0 8px 32px rgba(0,128,0,0.08);
-        }
-        
-        .ground-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 4px 16px rgba(0,128,0,0.10);
-            margin-bottom: 30px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .ground-card:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 8px 32px rgba(0,128,0,0.18);
-        }
-        
-        .ground-img {
-            border-radius: 15px 15px 0 0;
-            object-fit: cover;
-            height: 180px;
-            width: 100%;
-        }
-        
-        .ground-title {
-            color: #157347;
-            font-size: 1.3rem;
-            font-weight: bold;
-        }
-        
-        .ground-location {
-            color: #388e3c;
-            font-size: 1rem;
-        }
-        
-        .ground-rate {
-            color: #fff;
-            background: #157347;
-            border-radius: 8px;
-            padding: 4px 12px;
-            font-size: 1rem;
-            font-weight: bold;
-            display: inline-block;
-            margin-top: 8px;
-        }
-        
-        .option-card {
-            /* Styles our option buttons */
-            background: rgba(255,255,255,0.95);
-            /* Semi-transparent white background */
-            border-radius: 15px;
-            /* Rounds the corners */
-            padding: 30px;
-            /* Adds space inside the cards */
-            margin: 20px;
-            /* Adds space between cards */
-            box-shadow: 0 8px 32px rgba(0,128,0,0.10);
-            /* Adds a nice shadow effect */
-            transition: transform 0.3s ease;
-            /* Makes the hover animation smooth */
-            text-decoration: none;
-            /* Removes the underline from links */
-            color: #333;
-            /* Dark text color */
-            display: inline-block;
-            /* Makes cards display side by side */
-        }
-        
-        .option-card:hover {
-            /* What happens when you hover over the cards */
-            transform: translateY(-5px);
-            /* Moves the card up slightly */
-            box-shadow: 0 12px 40px rgba(0,128,0,0.15);
-            /* Makes shadow bigger on hover */
-            text-decoration: none;
-            /* Keeps no underline on hover */
-            color: #333;
-            /* Keeps text color the same */
-        }
-        
-        .option-icon {
-            /* Styles the icons in our cards */
-            font-size: 3rem;
-            /* Makes icons large */
-            margin-bottom: 15px;
-            /* Adds space below icons */
-            color: #11998e;
-            /* Makes icons green */
-        }
-        
-        .option-title {
-            /* Styles the titles in our cards */
-            font-size: 1.5rem;
-            /* Large text for titles */
-            font-weight: bold;
-            /* Makes titles bold */
-            margin-bottom: 10px;
-            /* Adds space below titles */
-        }
-        
-        .option-description {
-            /* Styles the descriptions in our cards */
-            color: #666;
-            /* Gray text for descriptions */
-            font-size: 0.9rem;
-            /* Smaller text for descriptions */
-        }
-    </style>
-</head>
+{% block extra_css %}
+<style>
+    /* Light, punchy Pakistan-inspired theme */
+    :root{--pk-green:#0aa34f; --pk-deep:#0b6b3a; --pk-gold:#ffb703; --muted:#6b7280; --paper:#f7f8fc; --card:#ffffff}
+    .hero{padding:56px 0 16px}
+    .hero h1{font-weight:900;letter-spacing:.2px;color:var(--pk-deep)}
+    .row-scroller{display:grid;grid-auto-flow:column;grid-auto-columns:calc(33% - 14px);gap:18px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}
+    .row-scroller::-webkit-scrollbar{display:none}
+    .match-card{background:var(--card);border:1px solid rgba(0,0,0,.06);border-radius:20px;overflow:hidden;transition:transform .2s ease, box-shadow .2s ease;scroll-snap-align:start;box-shadow:0 16px 40px rgba(16,24,40,.08)}
+    .match-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(16,24,40,.12)}
+    .match-thumb{height:260px;object-fit:cover;width:100%}
+    .match-body{padding:14px}
+    .muted{color:var(--muted)}
+    .option-card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:12px;color:#111827;text-decoration:none;box-shadow:0 10px 30px rgba(16,24,40,.08)}
+    .option-card:hover{background:#f9fafb}
+    .pills .btn{border-radius:999px}
+    .pill-light{background:#e8f5ee;border:none;color:var(--pk-deep)}
+    @media (max-width:900px){.row-scroller{grid-auto-columns:80%}}
+</style>
+{% endblock %}
 
-<body>
-    <!-- Body contains all the visible content of our webpage -->
-    
-    <div class="container">
-        <!-- Container centers our content and gives it proper spacing -->
-        
-        <!-- Flash Messages -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <div class="mt-3">
-                    {% for category, message in messages %}
-                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+{% block content %}
+<div class="app-container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="mt-3">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <div class="hero">
+        <h1>Find a game. Join instantly.</h1>
+        <div class="muted mb-3">Browse live matches across grounds. Log in only when you hit join.</div>
+        <div class="d-flex gap-2 pills mb-3">
+            <button class="btn pill-light btn-sm">Football</button>
+            <button class="btn pill-light btn-sm">Cricket</button>
+            <button class="btn pill-light btn-sm">Trending</button>
+        </div>
+        {% if lobby_cards %}
+        <h5 class="mb-2">Ongoing games</h5>
+        <div class="row-scroller mb-4">
+            {% for c in lobby_cards %}
+            <div class="match-card">
+                <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1200&q=60' }}" alt="{{ c.ground.name }}">
+                <div class="match-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <div class="fw-bold">{{ c.ground.name }}</div>
+                            <div class="muted small">{{ c.ground.location }} • {{ c.match.date }} {{ c.match.time }}</div>
+                            <div class="muted small">{{ c.count }}/{{ c.capacity }} joined</div>
                         </div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endwith %}
-        
-        <div class="hero-section">
-            <!-- This is our main content area -->
-            
-            <h1 class="hero-title">⚽ Football Grounds Pakistan</h1>
-            <!-- Main heading with a football emoji -->
-            
-            <p class="hero-subtitle">
-                Find and book football grounds across Pakistan!<br>
-                <span style="color:#38ef7d;font-weight:bold;">Green, sporty, and ready for action!</span>
-            </p>
-            <!-- Subtitle explaining what the website does -->
-            
-            <!-- List of Grounds -->
-            <!-- Removed grounds listing section as requested -->
-            <!-- Existing options (signup/login) -->
-            <div class="row justify-content-center">
-                <div class="col-md-4">
-                    <a href="{{ url_for('signup_player') }}" class="option-card">
-                        <div class="option-icon">👤</div>
-                        <div class="option-title">Sign Up as Player</div>
-                        <div class="option-description">
-                            Join the community! Find grounds, book slots, and connect with other players.
+                        <div>
+                            <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
                         </div>
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <a href="{{ url_for('signup_host') }}" class="option-card">
-                        <div class="option-icon">🏟️</div>
-                        <div class="option-title">Sign Up as Host</div>
-                        <div class="option-description">
-                            Own a football ground? List it here and start earning from bookings.
-                        </div>
-                    </a>
-                </div>
-                <div class="col-md-4">
-                    <a href="{{ url_for('login') }}" class="option-card">
-                        <div class="option-icon">🔑</div>
-                        <div class="option-title">Log In</div>
-                        <div class="option-description">
-                            Already have an account? Sign in to access your dashboard.
-                        </div>
-                    </a>
+                    </div>
                 </div>
             </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        <div class="d-flex gap-2">
+            <a href="{{ url_for('grounds') }}" class="btn btn-primary">Browse grounds</a>
+            {% if not session.get('user_type') %}
+            <a href="{{ url_for('signup_player') }}" class="option-card">👤 <span>Sign up as player</span></a>
+            <a href="{{ url_for('signup_host') }}" class="option-card">🏟️ <span>Sign up as host</span></a>
+            {% endif %}
         </div>
     </div>
-    
-    <!-- Bootstrap JavaScript - Adds interactive features -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html> 
+</div>
+{% endblock %}
