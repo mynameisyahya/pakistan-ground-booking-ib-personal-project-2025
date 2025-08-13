@@ -207,12 +207,32 @@
       .tv-count{font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#e9ecef}
       .tv-progress{height:12px;background:#222;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
       .tv-progress > div{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
-      .tv-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:12px;margin-top:12px;align-items:start}
+      .tv-progress.full > div{background:linear-gradient(90deg,#22c55e,#22c55e)}
+      .tv-lobby-wrap{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);margin-top:12px}
+      .tv-lobby{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
+      @media(min-width:992px){.tv-lobby{grid-template-columns:repeat(10,1fr)}}
+      .tv-slot{height:68px;border-radius:14px;border:1px dashed rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.02)}
+      .tv-grid-wrap{margin-top:14px;padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02)}
+      .tv-grid{display:grid;grid-template-columns:1fr 1px 1fr;gap:12px;align-items:start}
       .tv-divider{width:1px;background:linear-gradient(180deg,rgba(255,255,255,.2),rgba(255,255,255,.05));height:100%;min-height:120px;border-radius:999px}
       .tv-col{display:grid;grid-template-columns:1fr 1fr;gap:12px}
       @media(min-width:768px){.tv-col{grid-template-columns:1fr 1fr}}
       .tv-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));backdrop-filter:blur(6px);opacity:0;transform:translateY(10px) scale(.98);transition:opacity .35s ease, transform .35s ease, box-shadow .2s ease}
       .tv-card.show{opacity:1;transform:translateY(0) scale(1);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+      .tv-card.leaving-left{animation:tv-leave-left .35s ease forwards}
+      .tv-card.leaving-right{animation:tv-leave-right .35s ease forwards}
+      @keyframes tv-leave-left{to{transform:translate(-60px,120px) scale(.95);opacity:0.2}}
+      @keyframes tv-leave-right{to{transform:translate(60px,120px) scale(.95);opacity:0.2}}
+      .tv-ghost{position:relative}
+      .tv-slide-left{animation:tv-slide-left .55s ease forwards}
+      .tv-slide-right{animation:tv-slide-right .55s ease forwards}
+      @keyframes tv-slide-left{from{transform:translateY(-18px);opacity:0}to{transform:translateY(0);opacity:1}}
+      @keyframes tv-slide-right{from{transform:translateY(-18px);opacity:0}to{transform:translateY(0);opacity:1}}
+      .tv-card-slot{display:flex;align-items:center;justify-content:center;min-height:72px;border-radius:14px;border:1px solid rgba(255,255,255,.08);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.02));}
+      .tv-ball{width:44px;height:44px;border-radius:50%;background:#111 url('https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png') center/cover no-repeat;box-shadow:0 4px 14px rgba(0,0,0,.45);transform:scale(.2);opacity:.2;animation:tv-ball-pop .5s ease-out forwards}
+      @keyframes tv-ball-pop{0%{transform:scale(.2);opacity:.2}70%{transform:scale(1.15);opacity:1}100%{transform:scale(1);opacity:1}}
+      .tv-ball.out{animation:tv-ball-out .28s ease-in forwards}
+      @keyframes tv-ball-out{0%{transform:scale(1);opacity:1}100%{transform:scale(.1);opacity:0}}
       .tv-img{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.4)}
       .tv-name{font-weight:700;color:#f9fafb}
       .tv-age{font-size:.8rem;color:#cbd5e1}
@@ -220,54 +240,199 @@
       @keyframes tv-shimmer{0%{background-position:0% 0}100%{background-position:-200% 0}}
       .tv-badge{margin-left:auto;font-size:.72rem;padding:.2rem .5rem;border-radius:999px;background:#1f2937;color:#e5e7eb;border:1px solid rgba(255,255,255,.08)}
       .tv-team-title{font-weight:800;letter-spacing:.02em;margin-bottom:8px;color:#e9ecef}
+      .tv-flyer{position:fixed; z-index:1085; pointer-events:none;}
       `;
       var s=document.createElement('style'); s.innerHTML=css; document.head.appendChild(s);
     }
     style();
-    function render(container, data){
+    var stateByGround = {};
+    var FALLBACK_PFPS = [
+      'https://em-content.zobj.net/thumbs/240/apple/354/alien_1f47d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/skull_1f480.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/fire_1f525.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/loudly-crying-face_1f62d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/zany-face_1f92a.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/clown-face_1f921.png'
+    ];
+    function pfpUrl(player, idx){
+      return player.profile_image_url || FALLBACK_PFPS[idx % FALLBACK_PFPS.length];
+    }
+
+    function render(container, data, groundId){
+      var prevState = stateByGround[groundId];
+      if(prevState && prevState.animating){
+        return; // avoid overlapping animations while a transition is in progress
+      }
       container.innerHTML='';
-      var countWrap=h('div','tv-count',[data.count + ' / ' + (data.capacity||10) + ' players joined']);
+      var capacity=(data.capacity||10);
+      var countWrap=h('div','tv-count',[data.count + ' / ' + capacity + ' players joined']);
       var barOuter=h('div','tv-progress'), bar=h('div'); barOuter.appendChild(bar);
+      if(data.count >= capacity){ barOuter.classList.add('full'); }
       container.appendChild(countWrap); container.appendChild(barOuter);
-      requestAnimationFrame(function(){ bar.style.width=((data.count/(data.capacity||10))*100)+'%'; });
+      requestAnimationFrame(function(){ bar.style.width=((data.count/capacity)*100)+'%'; });
+
+      var players=(data.players||[]);
+      var allAssigned = players.length===capacity && players.every(function(p){ return p.team==='A' || p.team==='B'; });
+      var state = stateByGround[groundId] || { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false };
+      if(state.matchId !== data.match_id){ state = { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false }; }
+
+      if(!allAssigned){ state.phase = 'lobby'; }
+
+      if(state.phase === 'lobby' || state.phase === 'transitioning'){
+        // Build top lobby container with header and 10 slots, shuffled cards
+        var lobbyWrap=h('div','tv-lobby-wrap');
+        var lobbyTitle=h('div','tv-team-title',["Lobby (unsorted)"]);
+        var lobby=h('div','tv-lobby');
+        var shuffled=players.slice().sort(function(){ return Math.random()-0.5; });
+        for(var i=0;i<capacity;i++){
+          if(i<shuffled.length){
+            var p=shuffled[i];
+            var card=h('div','tv-card');
+            var img=h('img','tv-img'); img.src=pfpUrl(p,i);
+            var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
+            card.appendChild(img); card.appendChild(meta);
+            (function(card,delay){ setTimeout(function(){ card.classList.add('show'); }, delay); })(card, 25*i);
+            lobby.appendChild(card);
+          } else {
+            lobby.appendChild(h('div','tv-slot',["Empty"]));
+          }
+        }
+        lobbyWrap.appendChild(lobbyTitle);
+        lobbyWrap.appendChild(lobby);
+        container.appendChild(lobbyWrap);
+
+        // If we just became full and assignment exists, schedule transition
+        if(allAssigned && !state.transitioned && !state.animating){
+          state.phase = 'transitioning';
+          state.animating = true;
+          stateByGround[groundId] = state;
+          var snapshot = JSON.parse(JSON.stringify(players));
+          setTimeout(function(){ transitionFromLobby(container, lobbyWrap, lobby, snapshot, capacity, groundId); }, 1000);
+          return;
+        }
+      }
+
+      if(state.phase === 'teams' && allAssigned){
+        renderTeams(container, players, capacity, false);
+      }
+
+      stateByGround[groundId] = state;
+    }
+
+    function renderTeams(container, players, capacity, animate){
+      var gridWrap=h('div','tv-grid-wrap');
       var grid=h('div','tv-grid');
       var colA=h('div','tv-col');
       var colB=h('div','tv-col');
       var divider=h('div','tv-divider');
-      var players=(data.players||[]);
-      var capacity=(data.capacity||10);
-
-      // Titles
       colA.appendChild(h('div','tv-team-title',['Team A']));
       colB.appendChild(h('div','tv-team-title',['Team B']));
-
-      // Allocate cards to A/B based on team label; if none yet, put into A until 5 then B
       var aCount=0,bCount=0;
       players.forEach(function(p, idx){
-        var card=h('div','tv-card');
-        var img=h('img','tv-img'); img.src=p.profile_image_url || 'https://via.placeholder.com/80';
-        var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
-        card.appendChild(img); card.appendChild(meta);
-        if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
-        var target = p.team === 'B' ? colB : (p.team === 'A' ? colA : (aCount < 5 ? colA : colB));
-        target.appendChild(card);
+        var target = p.team === 'B' ? colB : colA;
+        if(animate){
+          var slot=h('div','tv-card-slot');
+          var ball=h('div','tv-ball');
+          slot.appendChild(ball);
+          target.appendChild(slot);
+          // Reveal player card after ball pop-in
+          (function(slot,ball,player,delay,i){
+            setTimeout(function(){
+              ball.classList.add('out');
+              setTimeout(function(){
+                slot.innerHTML='';
+                var card=h('div','tv-card');
+                var img=h('img','tv-img'); img.src=pfpUrl(player,i);
+                var meta=h('div','', [ h('div','tv-name',[player.name || player.email || 'Player']), h('div','tv-age',['Age: ' + (player.age ?? '-')]) ]);
+                card.appendChild(img); card.appendChild(meta);
+                if(player.team){ card.appendChild(h('span','tv-badge',['Team '+player.team])); }
+                slot.appendChild(card);
+                requestAnimationFrame(function(){ card.classList.add('show'); });
+              }, 200);
+            }, delay);
+          })(slot, ball, p, 160*idx, idx);
+        } else {
+          var card=h('div','tv-card show');
+          var img=h('img','tv-img'); img.src=pfpUrl(p,idx);
+          var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
+          card.appendChild(img); card.appendChild(meta);
+          if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
+          target.appendChild(card);
+        }
         if(target===colA) aCount++; else bCount++;
-        (function(card,delay){ setTimeout(function(){ card.classList.add('show'); }, delay); })(card, 40*idx);
       });
-
-      // Fill skeletons up to 5 per side for balanced look
       for(var i=aCount;i<5;i++){ colA.appendChild(h('div','tv-skeleton')); }
       for(var j=bCount;j<5;j++){ colB.appendChild(h('div','tv-skeleton')); }
+      grid.appendChild(colA); grid.appendChild(divider); grid.appendChild(colB);
+      gridWrap.appendChild(grid);
+      container.appendChild(gridWrap);
+    }
 
-      grid.appendChild(colA);
-      grid.appendChild(divider);
-      grid.appendChild(colB);
-      container.appendChild(grid);
+    function transitionFromLobby(container, lobbyWrap, lobby, players, capacity, groundId){
+      // Create team grid under lobby and keep lobby visible above
+      var gridWrap=h('div','tv-grid-wrap');
+      var grid=h('div','tv-grid');
+      var colA=h('div','tv-col');
+      var colB=h('div','tv-col');
+      var divider=h('div','tv-divider');
+      colA.appendChild(h('div','tv-team-title',['Team A']));
+      colB.appendChild(h('div','tv-team-title',['Team B']));
+      container.appendChild(gridWrap);
+      gridWrap.appendChild(grid);
+      grid.appendChild(colA); grid.appendChild(divider); grid.appendChild(colB);
+
+      var lobbyCards = Array.prototype.slice.call(lobby.querySelectorAll('.tv-card'));
+      // If counts mismatch, synthesize order from players
+      var order = players.slice();
+      // Animate translationally: clone moving card and fly to target position one-by-one
+      function getCenter(el){ var r=el.getBoundingClientRect(); return { x:r.left + r.width/2 + window.scrollX, y:r.top + r.height/2 + window.scrollY }; }
+      function createFlyer(card){
+        var r=card.getBoundingClientRect();
+        var clone=card.cloneNode(true); clone.classList.add('tv-flyer'); clone.style.left=r.left+window.scrollX+'px'; clone.style.top=r.top+window.scrollY+'px'; clone.style.width=r.width+'px'; clone.style.opacity='1'; document.body.appendChild(clone); return clone;
+      }
+      function ensureTeamSlot(targetCol){ var slot=h('div','tv-card-slot'); targetCol.appendChild(slot); return slot; }
+      function moveOne(i){
+        if(i>=order.length){ finish(); return; }
+        var p=order[i]; var source=lobbyCards[i]; if(!source){ moveOne(i+1); return; }
+        // faint ghost remains
+        source.style.opacity=0.2; source.style.transform='scale(.98)';
+        var flyer=createFlyer(source);
+        var targetCol = p.team==='B' ? colB : colA;
+        var slot=ensureTeamSlot(targetCol);
+        var targetCenter=getCenter(slot);
+        var flyerCenter=getCenter(flyer);
+        var dx=targetCenter.x - flyerCenter.x; var dy=targetCenter.y - flyerCenter.y;
+        flyer.style.transition='transform .85s ease, opacity .85s ease';
+        flyer.style.transform='translate('+dx+'px,'+dy+'px)';
+        setTimeout(function(){
+          // replace slot with final card
+          slot.innerHTML='';
+          var cardEl=h('div','tv-card show');
+          var img=h('img','tv-img'); img.src=pfpUrl(p,i);
+          var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
+          cardEl.appendChild(img); cardEl.appendChild(meta);
+          if(p.team){ cardEl.appendChild(h('span','tv-badge',['Team '+p.team])); }
+          slot.appendChild(cardEl);
+          flyer.style.opacity='0';
+          setTimeout(function(){ flyer.remove(); moveOne(i+1); }, 250);
+        }, 900);
+      }
+      function finish(){ var st = stateByGround[groundId] || {}; st.phase='teams'; st.transitioned=true; st.animating=false; stateByGround[groundId]=st; }
+      // Start sequential movement (slower per your request)
+      setTimeout(function(){ moveOne(0); }, 200);
+
+      // After all done, mark transition as complete to avoid looping
+      // handled in finish()
     }
     function getDateTime(groundId){
       var dateEl=document.getElementById('vt-date'+groundId) || document.getElementById('date'+groundId);
       var timeEl=document.getElementById('vt-time'+groundId) || document.getElementById('time'+groundId);
-      return { date: dateEl?dateEl.value:'', time: timeEl?timeEl.value:'' };
+      var dateVal = dateEl && dateEl.value ? dateEl.value : new Date().toISOString().slice(0,10);
+      var timeVal = timeEl && timeEl.value ? timeEl.value : (function(){ var d=new Date(); var hh=String(d.getHours()).padStart(2,'0'); var mm=String(d.getMinutes()).padStart(2,'0'); return hh+':'+mm; })();
+      // backfill inputs for UX
+      if(dateEl && !dateEl.value) dateEl.value = dateVal;
+      if(timeEl && !timeEl.value) timeEl.value = timeVal;
+      return { date: dateVal, time: timeVal };
     }
     function poll(container, groundId){
       var dt=getDateTime(groundId); if(!dt.date || !dt.time) return;
