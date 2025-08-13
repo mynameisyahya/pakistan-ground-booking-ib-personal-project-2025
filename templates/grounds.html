@@ -115,6 +115,7 @@
                         <a href="{{ url_for('final_booking', ground_id=ground.id) }}" class="btn btn-success mt-4 w-100">View & Book</a>
                         {% if is_player %}
                         <button class="btn btn-primary mt-2 w-100" data-bs-toggle="modal" data-bs-target="#joinMatchModal{{ ground.id }}">Join Match</button>
+                        <button class="btn btn-outline-info mt-2 w-100" data-bs-toggle="modal" data-bs-target="#viewTeammatesModal{{ ground.id }}">View Teammates</button>
                         {% endif %}
                     </div>
                 </div>
@@ -127,7 +128,7 @@
                         <h5 class="modal-title">Join Match - {{ ground.name }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                       </div>
-                      <form method="POST" action="{{ url_for('join_match', ground_id=ground.id) }}">
+                       <form method="POST" action="{{ url_for('join_match', ground_id=ground.id) }}">
                         <div class="modal-body">
                           <div class="mb-3">
                             <label for="date{{ ground.id }}" class="form-label">Date</label>
@@ -138,12 +139,45 @@
                             <input type="time" class="form-control" id="time{{ ground.id }}" name="time" required>
                           </div>
                           <div class="text-muted small">You'll be added to the waiting pool for this ground, date and time. Once 10 players join, teams are formed using median-based balancing and sent to the host.</div>
+                           <div class="mt-3">
+                             <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="modal" data-bs-target="#viewTeammatesModal{{ ground.id }}">View Teammates</button>
+                           </div>
                         </div>
                         <div class="modal-footer">
                           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                           <button type="submit" class="btn btn-primary">Join Match</button>
                         </div>
                       </form>
+                    </div>
+                  </div>
+                </div>
+                <!-- View Teammates Modal (on-demand fetch) -->
+                <div class="modal fade" id="viewTeammatesModal{{ ground.id }}" tabindex="-1" aria-hidden="true">
+                  <div class="modal-dialog modal-dialog-scrollable">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title">Teammates - {{ ground.name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body">
+                        <div class="row g-2 mb-3">
+                          <div class="col-6">
+                            <label class="form-label small">Date</label>
+                            <input type="date" class="form-control" id="vt-date{{ ground.id }}">
+                          </div>
+                          <div class="col-6">
+                            <label class="form-label small">Time</label>
+                            <input type="time" class="form-control" id="vt-time{{ ground.id }}">
+                          </div>
+                        </div>
+                        <div class="d-flex justify-content-end mb-2">
+                          <button type="button" class="btn btn-sm btn-outline-secondary" id="teammates-refresh-{{ ground.id }}">Refresh</button>
+                        </div>
+                        <div id="teammates-visualizer-{{ ground.id }}" class="tv-container"></div>
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -155,4 +189,90 @@
         {% endif %}
     </div>
 </div>
-{% endblock %} 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function(){
+    // Simple animated visualizer (no framework). Polls every 3s.
+    function h(tag, className, children){
+      var el = document.createElement(tag);
+      if(className) el.className = className;
+      (children||[]).forEach(function(c){ if(typeof c === 'string'){ el.appendChild(document.createTextNode(c)); } else if(c){ el.appendChild(c); } });
+      return el;
+    }
+    function style(){
+      var css = `
+      .tv-container{padding:10px;background:#0f1115;border-radius:12px;border:1px solid rgba(255,255,255,.08);color:#e9ecef}
+      .tv-count{font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#e9ecef}
+      .tv-progress{height:12px;background:#222;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
+      .tv-progress > div{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+      .tv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
+      @media(min-width:768px){.tv-grid{grid-template-columns:repeat(3,1fr)}}
+      .tv-card{display:flex;align-items:center;gap:12px;padding:12px;border:1px solid rgba(255,255,255,.08);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.03));backdrop-filter:blur(6px);opacity:0;transform:translateY(10px) scale(.98);transition:opacity .35s ease, transform .35s ease, box-shadow .2s ease}
+      .tv-card.show{opacity:1;transform:translateY(0) scale(1);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+      .tv-img{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+      .tv-name{font-weight:700;color:#f9fafb}
+      .tv-age{font-size:.8rem;color:#cbd5e1}
+      .tv-skeleton{height:68px;border-radius:14px;background:linear-gradient(90deg,rgba(255,255,255,.06),rgba(255,255,255,.12),rgba(255,255,255,.06));background-size:200% 100%;animation:tv-shimmer 1.2s infinite}
+      @keyframes tv-shimmer{0%{background-position:0% 0}100%{background-position:-200% 0}}
+      .tv-badge{margin-left:auto;font-size:.72rem;padding:.2rem .5rem;border-radius:999px;background:#1f2937;color:#e5e7eb;border:1px solid rgba(255,255,255,.08)}
+      `;
+      var s=document.createElement('style'); s.innerHTML=css; document.head.appendChild(s);
+    }
+    style();
+    function render(container, data){
+      container.innerHTML='';
+      var countWrap=h('div','tv-count',[data.count + ' / ' + (data.capacity||10) + ' players joined']);
+      var barOuter=h('div','tv-progress'), bar=h('div'); barOuter.appendChild(bar);
+      container.appendChild(countWrap); container.appendChild(barOuter);
+      requestAnimationFrame(function(){ bar.style.width=((data.count/(data.capacity||10))*100)+'%'; });
+      var grid=h('div','tv-grid');
+      // skeleton placeholders to fill up to capacity for a lively view
+      var players=(data.players||[]);
+      var capacity=(data.capacity||10);
+      var totalSlots=Math.max(players.length, capacity);
+      for(var i=0;i<totalSlots;i++){
+        if(i<players.length){
+          var p=players[i];
+          var card=h('div','tv-card');
+          var img=h('img','tv-img'); img.src=p.profile_image_url || 'https://via.placeholder.com/80';
+          var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
+          card.appendChild(img); card.appendChild(meta);
+          if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
+          grid.appendChild(card);
+          (function(card,idx){ setTimeout(function(){ card.classList.add('show'); }, 40*idx); })(card,i);
+        } else {
+          // empty slot skeleton to show room to grow
+          grid.appendChild(h('div','tv-skeleton'));
+        }
+      }
+      container.appendChild(grid);
+    }
+    function getDateTime(groundId){
+      var dateEl=document.getElementById('vt-date'+groundId) || document.getElementById('date'+groundId);
+      var timeEl=document.getElementById('vt-time'+groundId) || document.getElementById('time'+groundId);
+      return { date: dateEl?dateEl.value:'', time: timeEl?timeEl.value:'' };
+    }
+    function poll(container, groundId){
+      var dt=getDateTime(groundId); if(!dt.date || !dt.time) return;
+      fetch('/api/match_pool/'+groundId+'?date='+encodeURIComponent(dt.date)+'&time='+encodeURIComponent(dt.time))
+       .then(function(r){return r.json();})
+       .then(function(data){ if(data && !data.error){ render(container, data);} })
+       .catch(function(){});
+    }
+    document.addEventListener('shown.bs.modal', function (event) {
+      var modal=event.target; if(!modal.id || modal.id.indexOf('viewTeammatesModal')!==0) return;
+      var groundId=modal.id.replace('viewTeammatesModal','');
+      var mount=document.getElementById('teammates-visualizer-'+groundId);
+      if(!mount) return;
+      var doPoll=function(){ poll(mount, groundId); };
+      doPoll();
+      var interval=setInterval(doPoll, 3000);
+      var refresh=document.getElementById('teammates-refresh-'+groundId);
+      if(refresh){ refresh.onclick=doPoll; }
+      modal.addEventListener('hidden.bs.modal', function cleanup(){ clearInterval(interval); modal.removeEventListener('hidden.bs.modal', cleanup); });
+    });
+  })();
+</script>
+{% endblock %}

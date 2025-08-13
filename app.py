@@ -4,6 +4,7 @@ import random
 from flask_sqlalchemy import SQLAlchemy
 import os
 from markupsafe import escape
+from sqlalchemy import text
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
 # redirect: Sends users to different pages
@@ -43,6 +44,7 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=True)
     age = db.Column(db.Integer, nullable=True)
     user_type = db.Column(db.String(20), nullable=False)  # 'player' or 'host'
+    profile_image_url = db.Column(db.String(300), nullable=True)
 
 # Match pool per ground/date/time
 class Match(db.Model):
@@ -193,7 +195,7 @@ def signup_player():
             }
             # persist as User
             if not User.query.filter_by(email=email).first():
-                db.session.add(User(email=email, name=name, age=age, user_type='player'))
+                db.session.add(User(email=email, name=name, age=age, user_type='player', profile_image_url=request.form.get('profile_image_url')))
                 db.session.commit()
             session['user_type'] = 'player'
             session['user_email'] = email
@@ -294,7 +296,7 @@ def signup_host():
                 'phone': phone
             }
             if not User.query.filter_by(email=email).first():
-                db.session.add(User(email=email, name=name, age=int(age), user_type='host'))
+                db.session.add(User(email=email, name=name, age=int(age), user_type='host', profile_image_url=request.form.get('profile_image_url')))
                 db.session.commit()
             flash('Host account created! Preview your ground before publishing.', 'success')
             return redirect(url_for('grounds_host'))
@@ -571,6 +573,46 @@ def join_match(ground_id):
         flash(f'Joined match pool. Waiting for {10 - len(current_players)} more players.', 'success')
     return redirect(url_for('grounds'))
 
+@app.route('/api/match_pool/<int:ground_id>')
+def api_match_pool_by_ground(ground_id):
+    if 'user_email' not in session or session.get('user_type') != 'player':
+        return {"error": "unauthorized"}, 401
+    date = request.args.get('date')
+    time = request.args.get('time')
+    if not date or not time:
+        return {"error": "missing date/time"}, 400
+    ground = Ground.query.get_or_404(ground_id)
+    match = Match.query.filter_by(ground_id=ground.id, date=date, time=time).first()
+    if match is None:
+        # Return empty pool snapshot
+        return {
+            "match_id": None,
+            "status": "waiting",
+            "capacity": 10,
+            "count": 0,
+            "players": []
+        }
+    mps = MatchPlayer.query.filter_by(match_id=match.id).all()
+    emails = [mp.user_email for mp in mps]
+    users = {u.email: u for u in User.query.filter(User.email.in_(emails)).all()} if emails else {}
+    players = []
+    for mp in mps:
+        u = users.get(mp.user_email)
+        players.append({
+            "email": mp.user_email,
+            "name": (u.name if u else mp.user_email.split('@')[0]),
+            "age": (u.age if u else None),
+            "profile_image_url": (u.profile_image_url if u else None),
+            "team": mp.team
+        })
+    return {
+        "match_id": match.id,
+        "status": match.status,
+        "capacity": 10,
+        "count": len(players),
+        "players": players
+    }
+
 @app.route('/match/<int:match_id>/accept', methods=['POST'])
 def accept_match(match_id):
     match = Match.query.get_or_404(match_id)
@@ -615,11 +657,17 @@ def dev_fill_match(ground_id):
         db.session.commit()
     current_players = MatchPlayer.query.filter_by(match_id=match.id).all()
     remaining = 10 - len(current_players)
-    for i in range(max(0, remaining)):
-        email = f"bot{i}_{ground.id}_{date}_{time}@example.com"
+    # Optional count parameter to add a specific number of bots (for incremental testing)
+    try:
+        count_param = int(request.values.get('count', remaining))
+    except Exception:
+        count_param = remaining
+    add_n = max(0, min(remaining, count_param))
+    for i in range(add_n):
+        email = f"bot{random.randint(100000,999999)}_{ground.id}_{date}_{time}@example.com"
         user = User.query.filter_by(email=email).first()
         if not user:
-            user = User(email=email, name=f"Bot {i}", age=random.randint(16, 45), user_type='player')
+            user = User(email=email, name=f"Bot {i}", age=random.randint(16, 45), user_type='player', profile_image_url='https://via.placeholder.com/40')
             db.session.add(user)
             db.session.commit()
         if not MatchPlayer.query.filter_by(match_id=match.id, user_email=email).first():
@@ -643,6 +691,14 @@ def dev_fill_match(ground_id):
     else:
         flash('Added bots to the pool. Not yet at 10.', 'success')
     return redirect(url_for('grounds'))
+
+@app.route('/dev/ensure_tables')
+def dev_ensure_tables():
+    if not app.debug:
+        return {"error": "debug only"}, 403
+    db.create_all()
+    flash('Ensured database tables exist.', 'success')
+    return redirect(url_for('home'))
 
 @app.route('/dev/become_host', methods=['GET', 'POST'])
 def dev_become_host():
@@ -693,6 +749,17 @@ class Booking(db.Model):
 # Ensure all tables are created automatically
 with app.app_context():
     db.create_all()
+    # Lightweight migration: add missing columns if DB was created before new fields
+    try:
+        conn = db.engine.connect()
+        # Check user table for profile_image_url
+        cols = [row[1] for row in conn.execute(text("PRAGMA table_info('user')")).fetchall()]
+        if 'profile_image_url' not in cols:
+            conn.execute(text("ALTER TABLE user ADD COLUMN profile_image_url VARCHAR(300)"))
+        conn.close()
+    except Exception as e:
+        # Do not crash app; just log
+        print(f"DB migration check failed: {e}")
 
 @app.route('/host/dashboard', methods=['GET', 'POST'])
 def host_dashboard():
