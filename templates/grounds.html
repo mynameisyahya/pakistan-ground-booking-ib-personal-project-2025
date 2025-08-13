@@ -207,6 +207,7 @@
       .tv-count{font-weight:800;margin-bottom:10px;display:flex;align-items:center;gap:10px;color:#e9ecef}
       .tv-progress{height:12px;background:#222;border-radius:999px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1)}
       .tv-progress > div{height:100%;background:linear-gradient(90deg,#22c55e,#16a34a);width:0;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+      .tv-progress.fixed > div{transition:none !important}
       .tv-progress.full > div{background:linear-gradient(90deg,#22c55e,#22c55e)}
       .tv-lobby-wrap{padding:10px;border:1px solid rgba(255,255,255,.08);border-radius:12px;background:rgba(255,255,255,.02);margin-top:12px}
       .tv-lobby{display:grid;grid-template-columns:repeat(5,1fr);gap:10px}
@@ -247,15 +248,37 @@
     style();
     var stateByGround = {};
     var FALLBACK_PFPS = [
-      'https://em-content.zobj.net/thumbs/240/apple/354/alien_1f47d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/clown-face_1f921.png',
       'https://em-content.zobj.net/thumbs/240/apple/354/skull_1f480.png',
-      'https://em-content.zobj.net/thumbs/240/apple/354/fire_1f525.png',
-      'https://em-content.zobj.net/thumbs/240/apple/354/loudly-crying-face_1f62d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/goblin_1f47a.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/ogre_1f479.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/pile-of-poo_1f4a9.png',
       'https://em-content.zobj.net/thumbs/240/apple/354/zany-face_1f92a.png',
-      'https://em-content.zobj.net/thumbs/240/apple/354/clown-face_1f921.png'
+      'https://em-content.zobj.net/thumbs/240/apple/354/hot-face_1f975.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/loudly-crying-face_1f62d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/fire_1f525.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/alien_1f47d.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/nauseated-face_1f922.png',
+      'https://em-content.zobj.net/thumbs/240/apple/354/smiling-face-with-sunglasses_1f60e.png'
     ];
-    function pfpUrl(player, idx){
-      return player.profile_image_url || FALLBACK_PFPS[idx % FALLBACK_PFPS.length];
+    function hashStr(s){ if(!s) return 0; var h=0; for(var i=0;i<s.length;i++){ h=((h<<5)-h)+s.charCodeAt(i); h|=0; } return Math.abs(h); }
+    function getAvatarUrl(st, player){
+      st.avatarByEmail = st.avatarByEmail || {};
+      var key = (player && player.email) || (player && player.name) || 'anon';
+      if(st.avatarByEmail[key]) return st.avatarByEmail[key];
+      var url = player && player.profile_image_url ? player.profile_image_url : FALLBACK_PFPS[hashStr(key) % FALLBACK_PFPS.length];
+      st.avatarByEmail[key] = url;
+      return url;
+    }
+    function avatarImg(st, player){
+      var img = h('img','tv-img');
+      img.src = getAvatarUrl(st, player);
+      img.onerror = function(){
+        var key = (player && player.email) || (player && player.name) || 'anon';
+        var url = FALLBACK_PFPS[hashStr(key+'fallback') % FALLBACK_PFPS.length];
+        if(img.src !== url){ img.src = url; st.avatarByEmail[key] = url; }
+      };
+      return img;
     }
 
     function render(container, data, groundId){
@@ -263,18 +286,22 @@
       if(prevState && prevState.animating){
         return; // avoid overlapping animations while a transition is in progress
       }
+      // If already in teams phase and nothing changed, keep the current DOM (avoid re-creating bar and re-running animations)
+      if(prevState && prevState.phase === 'teams' && prevState.transitioned && data && data.status !== 'waiting'){
+        return;
+      }
       container.innerHTML='';
       var capacity=(data.capacity||10);
       var countWrap=h('div','tv-count',[data.count + ' / ' + capacity + ' players joined']);
       var barOuter=h('div','tv-progress'), bar=h('div'); barOuter.appendChild(bar);
-      if(data.count >= capacity){ barOuter.classList.add('full'); }
+      if(data.count >= capacity){ barOuter.classList.add('full'); barOuter.classList.add('fixed'); }
       container.appendChild(countWrap); container.appendChild(barOuter);
       requestAnimationFrame(function(){ bar.style.width=((data.count/capacity)*100)+'%'; });
 
       var players=(data.players||[]);
       var allAssigned = players.length===capacity && players.every(function(p){ return p.team==='A' || p.team==='B'; });
-      var state = stateByGround[groundId] || { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false };
-      if(state.matchId !== data.match_id){ state = { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false }; }
+      var state = stateByGround[groundId] || { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false, avatarByEmail:{} };
+      if(state.matchId !== data.match_id){ state = { phase: 'lobby', transitioned: false, matchId: data.match_id, animating: false, avatarByEmail:{} }; }
 
       if(!allAssigned){ state.phase = 'lobby'; }
 
@@ -288,7 +315,7 @@
           if(i<shuffled.length){
             var p=shuffled[i];
             var card=h('div','tv-card');
-            var img=h('img','tv-img'); img.src=pfpUrl(p,i);
+            var img=avatarImg(state, p);
             var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
             card.appendChild(img); card.appendChild(meta);
             (function(card,delay){ setTimeout(function(){ card.classList.add('show'); }, delay); })(card, 25*i);
@@ -313,13 +340,13 @@
       }
 
       if(state.phase === 'teams' && allAssigned){
-        renderTeams(container, players, capacity, false);
+        renderTeams(container, players, capacity, false, groundId);
       }
 
       stateByGround[groundId] = state;
     }
 
-    function renderTeams(container, players, capacity, animate){
+    function renderTeams(container, players, capacity, animate, groundId){
       var gridWrap=h('div','tv-grid-wrap');
       var grid=h('div','tv-grid');
       var colA=h('div','tv-col');
@@ -342,7 +369,7 @@
               setTimeout(function(){
                 slot.innerHTML='';
                 var card=h('div','tv-card');
-                var img=h('img','tv-img'); img.src=pfpUrl(player,i);
+          var img=avatarImg(stateByGround[groundId], player);
                 var meta=h('div','', [ h('div','tv-name',[player.name || player.email || 'Player']), h('div','tv-age',['Age: ' + (player.age ?? '-')]) ]);
                 card.appendChild(img); card.appendChild(meta);
                 if(player.team){ card.appendChild(h('span','tv-badge',['Team '+player.team])); }
@@ -353,7 +380,7 @@
           })(slot, ball, p, 160*idx, idx);
         } else {
           var card=h('div','tv-card show');
-          var img=h('img','tv-img'); img.src=pfpUrl(p,idx);
+          var img=avatarImg(stateByGround[groundId], p);
           var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
           card.appendChild(img); card.appendChild(meta);
           if(p.team){ card.appendChild(h('span','tv-badge',['Team '+p.team])); }
@@ -408,18 +435,28 @@
           // replace slot with final card
           slot.innerHTML='';
           var cardEl=h('div','tv-card show');
-          var img=h('img','tv-img'); img.src=pfpUrl(p,i);
+          var img=avatarImg(stateByGround[groundId]||{}, p);
           var meta=h('div','', [ h('div','tv-name',[p.name || p.email || 'Player']), h('div','tv-age',['Age: ' + (p.age ?? '-')]) ]);
           cardEl.appendChild(img); cardEl.appendChild(meta);
           if(p.team){ cardEl.appendChild(h('span','tv-badge',['Team '+p.team])); }
           slot.appendChild(cardEl);
           flyer.style.opacity='0';
-          setTimeout(function(){ flyer.remove(); moveOne(i+1); }, 250);
-        }, 900);
+          setTimeout(function(){ flyer.remove(); moveOne(i+1); }, 125);
+        }, 480);
       }
-      function finish(){ var st = stateByGround[groundId] || {}; st.phase='teams'; st.transitioned=true; st.animating=false; stateByGround[groundId]=st; }
+      function finish(){
+        var st = stateByGround[groundId] || {};
+        st.phase='teams'; st.transitioned=true; st.animating=false; stateByGround[groundId]=st;
+        if(lobbyWrap){
+          lobbyWrap.style.overflow='hidden';
+          lobbyWrap.style.maxHeight = lobbyWrap.scrollHeight + 'px';
+          lobbyWrap.style.transition = 'opacity .35s ease, max-height .45s ease, margin .3s ease, padding .3s ease';
+          requestAnimationFrame(function(){ lobbyWrap.style.opacity='0'; lobbyWrap.style.maxHeight='0'; lobbyWrap.style.margin='0'; lobbyWrap.style.padding='0'; });
+          setTimeout(function(){ if(lobbyWrap && lobbyWrap.parentNode){ lobbyWrap.parentNode.removeChild(lobbyWrap); } }, 520);
+        }
+      }
       // Start sequential movement (slower per your request)
-      setTimeout(function(){ moveOne(0); }, 200);
+      setTimeout(function(){ moveOne(0); }, 100);
 
       // After all done, mark transition as complete to avoid looping
       // handled in finish()

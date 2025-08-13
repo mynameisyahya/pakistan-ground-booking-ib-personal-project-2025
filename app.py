@@ -804,6 +804,32 @@ with app.app_context():
         # Do not crash app; just log
         print(f"DB migration check failed: {e}")
 
+    # Seed default demo accounts (idempotent)
+    demo_player_email = 'player@demo.com'
+    demo_host_email = 'demo@host.com'
+    if demo_player_email not in players:
+        players[demo_player_email] = {
+            'password': generate_password_hash('demo123'),
+            'name': 'Demo Player',
+            'age': 22,
+            'email': demo_player_email,
+            'phone': '0000000000'
+        }
+    if not User.query.filter_by(email=demo_player_email).first():
+        db.session.add(User(email=demo_player_email, name='Demo Player', age=22, user_type='player', profile_image_url='https://em-content.zobj.net/thumbs/240/apple/354/smiling-face-with-sunglasses_1f60e.png'))
+        db.session.commit()
+    if demo_host_email not in hosts:
+        hosts[demo_host_email] = {
+            'password': generate_password_hash('demo123'),
+            'name': 'Demo Host',
+            'age': 30,
+            'email': demo_host_email,
+            'phone': '0000000000'
+        }
+    if not User.query.filter_by(email=demo_host_email).first():
+        db.session.add(User(email=demo_host_email, name='Demo Host', age=30, user_type='host', profile_image_url='https://em-content.zobj.net/thumbs/240/apple/354/alien_1f47d.png'))
+        db.session.commit()
+
 @app.route('/host/dashboard', methods=['GET', 'POST'])
 def host_dashboard():
     if 'user_email' not in session or session.get('user_type') != 'host':
