@@ -7,38 +7,95 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- 🎨 Custom styling to make things look cooler -->
+    <!-- 🎨 Custom styling with new color palette -->
     <style>
         :root{
-            /* Poppy, modern palette */
-            --brand-1:#7b61ff;     /* electric purple */
-            --brand-2:#00d4ff;     /* aqua */
-            --accent-1:#ff5a7a;    /* coral */
-            --ink:#0f172a;         /* charcoal */
-            --muted:#64748b;       /* slate */
-            --paper:#f8fafc;       /* page */
-            --card:#ffffff;        /* surfaces */
+            /* New color palette */
+            --yale-blue: #0d3b66;      /* Primary blue */
+            --yale-blue-100: #030c15;  /* Darkest blue */
+            --yale-blue-200: #05182a;  /* Dark blue */
+            --yale-blue-300: #08243e;  /* Medium dark blue */
+            --yale-blue-400: #0b3053;  /* Medium blue */
+            --yale-blue-500: #0d3b66;  /* Base blue */
+            --yale-blue-600: #1764ad;  /* Light blue */
+            --yale-blue-700: #2e8ce4;  /* Lighter blue */
+            --yale-blue-800: #74b2ed;  /* Very light blue */
+            --yale-blue-900: #b9d9f6;  /* Lightest blue */
+            
+            --lemon-chiffon: #faf0ca;   /* Light cream */
+            --lemon-chiffon-100: #534408; /* Dark brown */
+            --lemon-chiffon-200: #a6880f; /* Medium brown */
+            --lemon-chiffon-300: #ebc326; /* Golden brown */
+            --lemon-chiffon-400: #f3da79; /* Light golden */
+            --lemon-chiffon-500: #faf0ca; /* Base cream */
+            --lemon-chiffon-600: #fbf4d6; /* Lighter cream */
+            --lemon-chiffon-700: #fcf7e0; /* Very light cream */
+            --lemon-chiffon-800: #fdf9ea; /* Almost white cream */
+            --lemon-chiffon-900: #fefcf5; /* Nearly white */
+            
+            --naples-yellow: #f4d35e;   /* Bright yellow */
+            --naples-yellow-100: #3f3204; /* Dark brown */
+            --naples-yellow-200: #7e6509; /* Medium brown */
+            --naples-yellow-300: #bd970d; /* Light brown */
+            --naples-yellow-400: #efc21e; /* Dark yellow */
+            --naples-yellow-500: #f4d35e; /* Base yellow */
+            --naples-yellow-600: #f6dc7d; /* Light yellow */
+            --naples-yellow-700: #f8e59e; /* Lighter yellow */
+            --naples-yellow-800: #faedbe; /* Very light yellow */
+            --naples-yellow-900: #fdf6df; /* Lightest yellow */
+            
+            --sandy-brown: #ee964b;     /* Orange brown */
+            --sandy-brown-100: #391d05;  /* Dark brown */
+            --sandy-brown-200: #723b0b;  /* Medium brown */
+            --sandy-brown-300: #ab5810;  /* Light brown */
+            --sandy-brown-400: #e47615;  /* Dark orange */
+            --sandy-brown-500: #ee964b;  /* Base orange */
+            --sandy-brown-600: #f1ab6d;  /* Light orange */
+            --sandy-brown-700: #f5c092;  /* Lighter orange */
+            --sandy-brown-800: #f8d5b6;  /* Very light orange */
+            --sandy-brown-900: #fceadb;  /* Lightest orange */
+            
+            --tomato: #f95738;          /* Bright red */
+            --tomato-100: #3b0b02;      /* Dark red */
+            --tomato-200: #771704;      /* Medium red */
+            --tomato-300: #b22206;      /* Light red */
+            --tomato-400: #ed2e07;      /* Dark orange-red */
+            --tomato-500: #f95738;      /* Base red */
+            --tomato-600: #fa7a61;      /* Light red */
+            --tomato-700: #fb9b88;      /* Lighter red */
+            --tomato-800: #fdbdb0;      /* Very light red */
+            --tomato-900: #feded7;      /* Lightest red */
+            
+            /* Semantic color mappings */
+            --brand-1: var(--yale-blue);
+            --brand-2: var(--naples-yellow);
+            --accent-1: var(--tomato);
+            --accent-2: var(--sandy-brown);
+            --ink: var(--yale-blue-100);
+            --muted: var(--yale-blue-300);
+            --paper: var(--lemon-chiffon-900);
+            --card: var(--lemon-chiffon-900);
         }
         body{
             min-height:100vh;
             background:
-                radial-gradient(1100px 480px at -10% -20%, rgba(123,97,255,.15), transparent),
-                radial-gradient(900px 420px at 110% -10%, rgba(0,212,255,.15), transparent),
-                linear-gradient(180deg,#fbfdff,#f3f7fb);
+                radial-gradient(1100px 480px at -10% -20%, rgba(13,59,102,.15), transparent),
+                radial-gradient(900px 420px at 110% -10%, rgba(244,211,94,.15), transparent),
+                linear-gradient(180deg,var(--lemon-chiffon-900),var(--lemon-chiffon-700));
             color:var(--ink);
             font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif
         }
-        .navbar{background:#ffffffcc;backdrop-filter:blur(10px);border-bottom:1px solid rgba(0,0,0,.06)}
-        .navbar-brand{font-weight:900;letter-spacing:.3px;color:var(--brand-1) !important}
-        .nav-link{color:#334155 !important}
-        .nav-link:hover{color:#000 !important}
-        .btn-primary{background:linear-gradient(90deg,var(--brand-1),var(--brand-2));border:none}
-        .btn-primary:hover{background:linear-gradient(90deg,var(--brand-2),var(--brand-1))}
-        .btn-outline-light{border-color:rgba(0,0,0,.15);color:#1f2937}
-        .btn-outline-light:hover{background:rgba(0,0,0,.04)}
+        .navbar{background:rgba(250,240,202,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(13,59,102,.1)}
+        .navbar-brand{font-weight:900;letter-spacing:.3px;color:var(--yale-blue) !important}
+        .nav-link{color:var(--yale-blue-400) !important}
+        .nav-link:hover{color:var(--yale-blue) !important}
+        .btn-primary{background:var(--yale-blue);border:none;color:var(--lemon-chiffon-900)}
+        .btn-primary:hover{background:var(--yale-blue-600);color:var(--lemon-chiffon-900)}
+        .btn-outline-light{border-color:rgba(13,59,102,.2);color:var(--yale-blue-400)}
+        .btn-outline-light:hover{background:rgba(13,59,102,.08);color:var(--yale-blue)}
         .app-container{max-width:1280px;padding:28px;margin:0 auto}
         .breadcrumb{display:none}
-        .card-clean{background:var(--card);border:1px solid rgba(0,0,0,.06);border-radius:16px;box-shadow:0 8px 28px rgba(16,24,40,.06)}
+        .card-clean{background:var(--card);border:1px solid rgba(13,59,102,.08);border-radius:16px;box-shadow:0 8px 28px rgba(13,59,102,.08)}
         .fade-in{animation:fade-in .35s ease both}
         @keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     </style>

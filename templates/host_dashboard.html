@@ -2,6 +2,80 @@
 
 {% block title %}Host Dashboard{% endblock %}
 
+{% block extra_css %}
+<style>
+    .container {
+        background: var(--lemon-chiffon-900);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(13,59,102,0.1);
+        border: 1px solid rgba(244,211,94,0.2);
+    }
+    h2 {
+        color: var(--yale-blue);
+        border-bottom: 2px solid var(--naples-yellow);
+        padding-bottom: 10px;
+    }
+    .table {
+        background: var(--lemon-chiffon-800);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .table thead th {
+        background: var(--yale-blue);
+        color: var(--lemon-chiffon-900);
+        border-color: var(--yale-blue-600);
+    }
+    .table tbody tr:hover {
+        background: var(--lemon-chiffon-700);
+    }
+    .badge.bg-warning {
+        background: var(--naples-yellow) !important;
+        color: var(--yale-blue-100) !important;
+    }
+    .badge.bg-success {
+        background: var(--yale-blue) !important;
+        color: var(--lemon-chiffon-900) !important;
+    }
+    .badge.bg-danger {
+        background: var(--tomato) !important;
+        color: var(--lemon-chiffon-900) !important;
+    }
+    .btn-success {
+        background: var(--yale-blue);
+        border: none;
+        color: var(--lemon-chiffon-900);
+    }
+    .btn-success:hover {
+        background: var(--yale-blue-600);
+        color: var(--lemon-chiffon-900);
+    }
+    .btn-danger {
+        background: var(--tomato);
+        border: none;
+        color: var(--lemon-chiffon-900);
+    }
+    .btn-danger:hover {
+        background: var(--tomato-600);
+        color: var(--lemon-chiffon-900);
+    }
+    .list-group-item {
+        background: var(--lemon-chiffon-800);
+        border: 1px solid rgba(244,211,94,0.3);
+        margin-bottom: 10px;
+        border-radius: 12px;
+    }
+    .list-group-item:hover {
+        background: var(--lemon-chiffon-700);
+    }
+    .alert-info {
+        background: var(--yale-blue-900);
+        color: var(--yale-blue-100);
+        border: 1px solid var(--yale-blue-800);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h2>Booking Requests

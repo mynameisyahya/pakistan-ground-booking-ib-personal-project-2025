@@ -2,6 +2,54 @@
 
 {% block title %}My Booking Requests{% endblock %}
 
+{% block extra_css %}
+<style>
+    .container {
+        background: var(--lemon-chiffon-900);
+        border-radius: 16px;
+        padding: 30px;
+        box-shadow: 0 8px 32px rgba(13,59,102,0.1);
+        border: 1px solid rgba(244,211,94,0.2);
+    }
+    h2 {
+        color: var(--yale-blue);
+        border-bottom: 2px solid var(--naples-yellow);
+        padding-bottom: 10px;
+        margin-bottom: 25px;
+    }
+    .table {
+        background: var(--lemon-chiffon-800);
+        border-radius: 12px;
+        overflow: hidden;
+    }
+    .table thead th {
+        background: var(--yale-blue);
+        color: var(--lemon-chiffon-900);
+        border-color: var(--yale-blue-600);
+    }
+    .table tbody tr:hover {
+        background: var(--lemon-chiffon-700);
+    }
+    .badge.bg-warning {
+        background: var(--naples-yellow) !important;
+        color: var(--yale-blue-100) !important;
+    }
+    .badge.bg-success {
+        background: var(--yale-blue) !important;
+        color: var(--lemon-chiffon-900) !important;
+    }
+    .badge.bg-danger {
+        background: var(--tomato) !important;
+        color: var(--lemon-chiffon-900) !important;
+    }
+    .alert-info {
+        background: var(--yale-blue-900);
+        color: var(--yale-blue-100);
+        border: 1px solid var(--yale-blue-800);
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <h2>My Booking Requests</h2>

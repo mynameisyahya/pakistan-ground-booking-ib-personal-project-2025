@@ -16,31 +16,34 @@
 {% block extra_css %}
 <style>
     body {
-        background: linear-gradient(135deg, #451500 0%, #764ba2 100%);
+        background: linear-gradient(135deg, var(--yale-blue-100) 0%, var(--yale-blue-400) 100%);
         min-height: 100vh;
         font-family: 'Arial', sans-serif;
     }
     .signup-form {
-        background: #461da884;
+        background: rgba(250,240,202,0.95);
         border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        box-shadow: 0 8px 32px rgba(13,59,102,0.15);
         padding: 40px;
         max-width: 400px;
         margin: 60px auto;
+        border: 1px solid rgba(244,211,94,0.3);
     }
     .form-title {
         font-size: 2rem;
         font-weight: bold;
-        color: #667eea;
+        color: var(--yale-blue);
         margin-bottom: 25px;
         text-align: center;
     }
     .btn-primary {
-        background: #667eea;
+        background: var(--yale-blue);
         border: none;
+        color: var(--lemon-chiffon-900);
     }
     .btn-primary:hover {
-        background: #5a67d8;
+        background: var(--yale-blue-600);
+        color: var(--lemon-chiffon-900);
     }
 </style>
 {% endblock %}
