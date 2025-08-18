@@ -168,6 +168,40 @@ def home():
             'count': count,
             'capacity': 10
         })
+    # Fallback demo cards if no real matches
+    if not cards:
+        cards = [
+            {
+                'match': type('obj', (object,), {'date': '2025-01-18', 'time': '18:00'})(),
+                'ground': type('obj', (object,), {
+                    'name': 'Jinnah Sports Complex',
+                    'location': 'Islamabad',
+                    'img': 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60'
+                })(),
+                'count': 7,
+                'capacity': 10
+            },
+            {
+                'match': type('obj', (object,), {'date': '2025-01-18', 'time': '19:00'})(),
+                'ground': type('obj', (object,), {
+                    'name': 'Karachi United Stadium',
+                    'location': 'Karachi',
+                    'img': 'https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80'
+                })(),
+                'count': 5,
+                'capacity': 10
+            },
+            {
+                'match': type('obj', (object,), {'date': '2025-01-18', 'time': '20:00'})(),
+                'ground': type('obj', (object,), {
+                    'name': 'Lahore Sports Arena',
+                    'location': 'Lahore',
+                    'img': 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
+                })(),
+                'count': 8,
+                'capacity': 10
+            }
+        ]
     return render_template('index.html', lobby_cards=cards)
 
 

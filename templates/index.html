@@ -29,13 +29,13 @@
     @keyframes floatB{from{transform:translateY(0)}to{transform:translateY(22px)}}
     .hero h1{font-weight:900;letter-spacing:.2px;color:var(--yale-blue-100);position:relative}
     .hero h1:after{content:"";display:block;width:78px;height:6px;background:var(--brand-1);border-radius:999px;margin-top:8px}
-    .row-wrap{position:relative}
+    .row-wrap{position:relative;overflow:hidden}
     .row-wrap:before,.row-wrap:after{content:"";position:absolute;top:0;bottom:0;width:80px;pointer-events:none;z-index:2}
     .row-wrap:before{left:0;background:linear-gradient(90deg, var(--lemon-chiffon-900), rgba(250,240,202,0))}
     .row-wrap:after{right:0;background:linear-gradient(270deg, var(--lemon-chiffon-900), rgba(250,240,202,0))}
-    .row-scroller{display:grid;grid-auto-flow:column;grid-auto-columns:calc(33% - 14px);gap:18px;overflow-x:auto;padding:10px 0 18px;scroll-snap-type:x mandatory;scroll-behavior:smooth}
+    .row-scroller{display:flex;gap:18px;overflow-x:auto;padding:10px 0 18px;scroll-snap-type:x mandatory;scroll-behavior:smooth;scrollbar-width:none;-ms-overflow-style:none;width:100%;position:relative}
     .row-scroller::-webkit-scrollbar{display:none}
-    .match-card{background:var(--card);border:1px solid rgba(13,59,102,.08);border-radius:20px;overflow:hidden;transition:transform .25s ease, box-shadow .25s ease;scroll-snap-align:start;box-shadow:0 16px 40px rgba(3,12,21,.08);transform-style:preserve-3d}
+    .match-card{background:var(--card);border:1px solid rgba(13,59,102,.08);border-radius:20px;overflow:hidden;transition:transform .25s ease, box-shadow .25s ease;scroll-snap-align:start;box-shadow:0 16px 40px rgba(3,12,21,.08);transform-style:preserve-3d;width:350px;flex-shrink:0}
     .match-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 24px 60px rgba(3,12,21,.14)}
     .match-thumb-wrap{position:relative}
     .match-thumb{height:260px;object-fit:cover;width:100%;display:block}
@@ -48,7 +48,7 @@
     .option-card:hover{background:var(--lemon-chiffon-800)}
     .pills .btn{border-radius:999px}
     .pill-light{background:var(--yale-blue-900);border:none;color:var(--yale-blue-100)}
-    @media (max-width:900px){.row-scroller{grid-auto-columns:80%}}
+    @media (max-width:900px){.match-card{min-width:280px}}
     /* Hero showcase (parallax cards) */
     .showcase{position:relative;overflow:hidden;border-radius:24px;box-shadow:0 24px 70px rgba(3,12,21,.18);height:52vh;min-height:340px;margin-bottom:24px}
     .showcase-layer{position:absolute;inset:0;background-position:center;background-size:cover;filter:saturate(1.1) contrast(1.05)}
@@ -105,7 +105,7 @@
             <div class="showcase-layer gradient"></div>
             <div class="showcase-content">
                 <div>
-                    <div class="showcase-title">Pakistan’s games, happening now.</div>
+                    <div class="showcase-title">Pakn’s games, happening now.</div>
                     <div class="muted">Pick a ground. Join a squad. Play.</div>
                         </div>
                 <div class="d-flex gap-2">
@@ -129,35 +129,73 @@
             <button class="btn pill-light btn-sm">Cricket</button>
             <button class="btn pill-light btn-sm">Trending</button>
                         </div>
-        {% if lobby_cards %}
         <h5 class="mb-2">Ongoing games</h5>
         <div class="row-wrap mb-4">
         <button class="btn btn-outline-light btn-sm position-absolute top-50 start-0 translate-middle-y z-1" id="prevBtn" style="backdrop-filter:blur(6px);">‹</button>
         <div class="row-scroller" id="ongoingRow">
-            {% for c in lobby_cards %}
-            <div class="match-card">
-                <div class="match-thumb-wrap">
-                    <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60' }}" alt="{{ c.ground.name }}">
-                    <div class="live-dot"><i></i> Live</div>
-                </div>
-                <div class="match-body">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <div>
-                            <div class="fw-bold">{{ c.ground.name }}</div>
-                            <div class="muted small">{{ c.ground.location }} • {{ c.match.date }} {{ c.match.time }}</div>
-                            <div class="muted small">{{ c.count }}/{{ c.capacity }} joined</div>
-                        </div>
-                        <div>
-                            <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
+            {% if lobby_cards %}
+                {% for c in lobby_cards %}
+                <div class="match-card">
+                    <div class="match-thumb-wrap">
+                        <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60' }}" alt="{{ c.ground.name }}">
+                        <div class="live-dot"><i></i> Live</div>
+                    </div>
+                    <div class="match-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">{{ c.ground.name }}</div>
+                                <div class="muted small">{{ c.ground.location }} • {{ c.match.date }} {{ c.match.time }}</div>
+                                <div class="muted small">{{ c.count }}/{{ c.capacity }} joined</div>
+                            </div>
+                            <div>
+                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
+                {% endfor %}
+            {% else %}
+                <!-- Fallback demo cards if no real matches -->
+                <div class="match-card">
+                    <div class="match-thumb-wrap">
+                        <img class="match-thumb" src="https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60" alt="Demo Ground">
+                        <div class="live-dot"><i></i> Live</div>
+                    </div>
+                    <div class="match-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">Demo Ground</div>
+                                <div class="muted small">Demo Location • 2025-01-18 18:00</div>
+                                <div class="muted small">7/10 joined</div>
+                            </div>
+                            <div>
+                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="match-card">
+                    <div class="match-thumb-wrap">
+                        <img class="match-thumb" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Demo Ground 2">
+                        <div class="live-dot"><i></i> Live</div>
+                    </div>
+                    <div class="match-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-bold">Demo Ground 2</div>
+                                <div class="muted small">Demo Location 2 • 2025-01-18 19:00</div>
+                                <div class="muted small">5/10 joined</div>
+                            </div>
+                            <div>
+                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
         </div>
         <button class="btn btn-outline-light btn-sm position-absolute top-50 end-0 translate-middle-y z-1" id="nextBtn" style="backdrop-filter:blur(6px);">›</button>
         </div>
-        {% endif %}
         <div class="d-flex gap-2">
             <a href="{{ url_for('grounds') }}" class="btn btn-primary">Browse grounds</a>
             {% if not session.get('user_type') %}
@@ -171,46 +209,40 @@
 
 {% block extra_js %}
 <script>
-  // Auto-scroll the ongoing row for a dynamic feel; pause on hover
-  (function(){
+  // True infinite scroll carousel
+  document.addEventListener('DOMContentLoaded', function() {
     const row = document.getElementById('ongoingRow');
-    const prev = document.getElementById('prevBtn');
-    const next = document.getElementById('nextBtn');
-    if(!row) return;
-    let idx = 0, paused = false;
-    row.addEventListener('mouseenter', ()=> paused=true);
-    row.addEventListener('mouseleave', ()=> paused=false);
-    setInterval(()=>{
-      if(paused) return;
-      const cards = row.children;
-      if(!cards.length) return;
-      const w = cards[0].getBoundingClientRect().width + 18; // card width + gap
-      row.scrollBy({ left: w, behavior: 'smooth' });
-      idx++;
-      if(idx % cards.length === 0){ row.scrollTo({ left: 0, behavior: 'smooth' }); }
-    }, 2800);
-
-    function scrollByCards(n){
-      const cards = row.children; if(!cards.length) return;
-      const w = cards[0].getBoundingClientRect().width + 18;
-      row.scrollBy({ left: w * n, behavior: 'smooth' });
+    if (!row) return;
+    
+    // Clone all cards multiple times for seamless infinite scroll
+    const originalCards = Array.from(row.children);
+    const totalClones = 3; // Create 3 sets of cards
+    
+    for (let i = 0; i < totalClones; i++) {
+      originalCards.forEach(card => {
+        const clone = card.cloneNode(true);
+        row.appendChild(clone);
+      });
     }
-    prev && prev.addEventListener('click', ()=> scrollByCards(-1));
-    next && next.addEventListener('click', ()=> scrollByCards(1));
-
-    // Subtle 3D tilt
-    row.addEventListener('mousemove', (e)=>{
-      const target = e.target.closest('.match-card');
-      if(!target) return;
-      const r = target.getBoundingClientRect();
-      const cx = e.clientX - r.left, cy = e.clientY - r.top;
-      const rx = (cy/r.height - .5) * -6;
-      const ry = (cx/r.width - .5) * 6;
-      target.style.transform = `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg)`;
-    });
-    row.addEventListener('mouseleave', ()=>{
-      [...row.querySelectorAll('.match-card')].forEach(c=> c.style.transform = '');
-    });
-  })();
+    
+    let position = 0;
+    const cardWidth = originalCards[0].getBoundingClientRect().width + 18;
+    
+    // Smooth continuous scrolling
+    function smoothScroll() {
+      position += 1;
+      
+      // When we've scrolled past the first set, reset to beginning seamlessly
+      if (position >= cardWidth * originalCards.length) {
+        position = 0;
+        row.scrollLeft = 0;
+      }
+      
+      row.scrollLeft = position;
+    }
+    
+    // 60fps smooth scrolling
+    setInterval(smoothScroll, 16);
+  });
 </script>
 {% endblock %}

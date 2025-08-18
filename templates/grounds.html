@@ -183,7 +183,7 @@
                           </div>
                           <div class="mb-3">
                             <label for="time{{ ground.id }}" class="form-label">Time</label>
-                            <input type="time" class="form-control" id="time{{ ground.id }}" name="time" required>
+                            <select class="form-control" id="time{{ ground.id }}" name="time" required></select>
                           </div>
                           <div class="text-muted small">You'll be added to the waiting pool for this ground, date and time. Once 10 players join, teams are formed using median-based balancing and sent to the host.</div>
                            <div class="mt-3">
@@ -214,7 +214,7 @@
                           </div>
                           <div class="col-6">
                             <label class="form-label small">Time</label>
-                            <input type="time" class="form-control" id="vt-time{{ ground.id }}">
+                            <select class="form-control" id="vt-time{{ ground.id }}"></select>
                           </div>
                         </div>
                         <div class="d-flex justify-content-end mb-2">
@@ -252,7 +252,31 @@
                     initializeGroundMap(ground);
                 }
             });
+            // Populate all time dropdowns for join match and teammates modals
+            populateAllTimeDropdowns();
         });
+
+        function populateAllTimeDropdowns() {
+          // For join match modals
+          document.querySelectorAll('select[id^="time"]').forEach(function(select) {
+            if (select.id.startsWith('time') && !select.id.startsWith('vt-time')) {
+              populateTimeDropdown(select);
+            }
+          });
+          // For teammates modals
+          document.querySelectorAll('select[id^="vt-time"]').forEach(populateTimeDropdown);
+        }
+        function populateTimeDropdown(select) {
+          select.innerHTML = '<option value="">Select Time</option>';
+          for (let hour = 6; hour <= 22; hour += 2) {
+            const timeStr = hour.toString().padStart(2, '0') + ':00';
+            const timeLabel = hour < 12 ? hour + ':00 AM' : (hour === 12 ? '12:00 PM' : (hour-12) + ':00 PM');
+            const option = document.createElement('option');
+            option.value = timeStr;
+            option.textContent = timeLabel;
+            select.appendChild(option);
+          }
+        }
 
 function initializeGroundMap(ground) {
     const mapElement = document.getElementById(`map-${ground.id}`);
@@ -506,8 +530,13 @@ function openOpenStreetMap(lat, lng, groundName) {
       grid.appendChild(colA); grid.appendChild(divider); grid.appendChild(colB);
 
       var lobbyCards = Array.prototype.slice.call(lobby.querySelectorAll('.tv-card'));
-      // If counts mismatch, synthesize order from players
-      var order = players.slice();
+      // Map lobby cards by player email (or name as fallback)
+      var playerToCard = {};
+      lobbyCards.forEach(function(card, idx){
+        var name = card.querySelector('.tv-name')?.textContent;
+        var email = (players[idx] && players[idx].email) || name;
+        if(email) playerToCard[email] = card;
+      });
       // Animate translationally: clone moving card and fly to target position one-by-one
       function getCenter(el){ var r=el.getBoundingClientRect(); return { x:r.left + r.width/2 + window.scrollX, y:r.top + r.height/2 + window.scrollY }; }
       function createFlyer(card){
@@ -516,8 +545,10 @@ function openOpenStreetMap(lat, lng, groundName) {
       }
       function ensureTeamSlot(targetCol){ var slot=h('div','tv-card-slot'); targetCol.appendChild(slot); return slot; }
       function moveOne(i){
-        if(i>=order.length){ finish(); return; }
-        var p=order[i]; var source=lobbyCards[i]; if(!source){ moveOne(i+1); return; }
+        if(i>=players.length){ finish(); return; }
+        var p=players[i];
+        var source = playerToCard[p.email] || lobbyCards[i];
+        if(!source){ moveOne(i+1); return; }
         // faint ghost remains
         source.style.opacity=0.2; source.style.transform='scale(.98)';
         var flyer=createFlyer(source);
@@ -551,11 +582,8 @@ function openOpenStreetMap(lat, lng, groundName) {
           setTimeout(function(){ if(lobbyWrap && lobbyWrap.parentNode){ lobbyWrap.parentNode.removeChild(lobbyWrap); } }, 520);
         }
       }
-      // Start sequential movement (slower per your request)
+      // Start sequential movement
       setTimeout(function(){ moveOne(0); }, 100);
-
-      // After all done, mark transition as complete to avoid looping
-      // handled in finish()
     }
     function getDateTime(groundId){
       var dateEl=document.getElementById('vt-date'+groundId) || document.getElementById('date'+groundId);
@@ -574,17 +602,62 @@ function openOpenStreetMap(lat, lng, groundName) {
        .then(function(data){ if(data && !data.error){ render(container, data);} })
        .catch(function(){});
     }
+    // DEMO DATA for default view (full team, all assigned)
+    var demoData = {
+      "match_id": "demo_123",
+      "status": "teams",
+      "capacity": 10,
+      "count": 10,
+      "players": [
+        {"email": "demo1@example.com", "name": "Ahmed Khan", "age": 25, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "A"},
+        {"email": "demo2@example.com", "name": "Sara Ahmed", "age": 28, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "B"},
+        {"email": "demo3@example.com", "name": "Usman Ali", "age": 22, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "A"},
+        {"email": "demo4@example.com", "name": "Fatima Zahra", "age": 26, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "B"},
+        {"email": "demo5@example.com", "name": "Hassan Raza", "age": 24, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "A"},
+        {"email": "demo6@example.com", "name": "Ayesha Malik", "age": 29, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "B"},
+        {"email": "demo7@example.com", "name": "Bilal Hassan", "age": 23, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "A"},
+        {"email": "demo8@example.com", "name": "Zainab Noor", "age": 27, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "B"},
+        {"email": "demo9@example.com", "name": "Ali Raza", "age": 21, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "A"},
+        {"email": "demo10@example.com", "name": "Mehwish Tariq", "age": 30, "profile_image_url": "https://em-content.zobj.net/thumbs/240/apple/354/soccer-ball_26bd.png", "team": "B"}
+      ]
+    };
+
+    // On teammates modal open, show demo team for default date/time, otherwise fetch from backend
     document.addEventListener('shown.bs.modal', function (event) {
       var modal=event.target; if(!modal.id || modal.id.indexOf('viewTeammatesModal')!==0) return;
       var groundId=modal.id.replace('viewTeammatesModal','');
       var mount=document.getElementById('teammates-visualizer-'+groundId);
       if(!mount) return;
-      var doPoll=function(){ poll(mount, groundId); };
-      doPoll();
-      var interval=setInterval(doPoll, 3000);
-      var refresh=document.getElementById('teammates-refresh-'+groundId);
-      if(refresh){ refresh.onclick=doPoll; }
-      modal.addEventListener('hidden.bs.modal', function cleanup(){ clearInterval(interval); modal.removeEventListener('hidden.bs.modal', cleanup); });
+      // Set default date/time to today and first time slot
+      var dateSel = document.getElementById('vt-date'+groundId);
+      var timeSel = document.getElementById('vt-time'+groundId);
+      if(dateSel) dateSel.value = new Date().toISOString().slice(0,10);
+      if(timeSel && timeSel.options.length>1) timeSel.selectedIndex=1;
+      // Show demo team for default
+      render(mount, demoData, groundId);
+      // On change, fetch from backend
+      var onChange = function() {
+        var dt = getDateTime(groundId);
+        // If default, show demo
+        if ((dateSel && dateSel.value === new Date().toISOString().slice(0,10)) && (timeSel && timeSel.selectedIndex === 1)) {
+          render(mount, demoData, groundId);
+        } else {
+          fetch('/api/match_pool/'+groundId+'?date='+encodeURIComponent(dt.date)+'&time='+encodeURIComponent(dt.time))
+            .then(function(r){return r.json();})
+            .then(function(data){
+              if(data && !data.error && data.count > 0){
+                render(mount, data, groundId);
+              } else {
+                mount.innerHTML = '<div class="text-center text-muted py-4"><h5>No Games Scheduled</h5><p>There are no games scheduled for this date and time.</p></div>';
+              }
+            })
+            .catch(function(){
+              mount.innerHTML = '<div class="text-center text-danger py-4"><h5>Error Loading Data</h5><p>Could not load match information. Please try again.</p></div>';
+            });
+        }
+      };
+      dateSel && dateSel.addEventListener('change', onChange);
+      timeSel && timeSel.addEventListener('change', onChange);
     });
   })();
 </script>
