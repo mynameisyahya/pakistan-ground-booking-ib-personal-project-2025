@@ -209,15 +209,19 @@
 
 {% block extra_js %}
 <script>
-  // True infinite scroll carousel
+  // Enhanced infinite scroll carousel with better UX
   document.addEventListener('DOMContentLoaded', function() {
     const row = document.getElementById('ongoingRow');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    
     if (!row) return;
     
-    // Clone all cards multiple times for seamless infinite scroll
     const originalCards = Array.from(row.children);
-    const totalClones = 3; // Create 3 sets of cards
+    if (originalCards.length === 0) return;
     
+    // Clone cards for seamless infinite scroll
+    const totalClones = 2;
     for (let i = 0; i < totalClones; i++) {
       originalCards.forEach(card => {
         const clone = card.cloneNode(true);
@@ -225,24 +229,88 @@
       });
     }
     
-    let position = 0;
-    const cardWidth = originalCards[0].getBoundingClientRect().width + 18;
+    let isScrolling = true;
+    let animationId;
+    let scrollSpeed = 0.5; // Slower, smoother speed
     
-    // Smooth continuous scrolling
-    function smoothScroll() {
-      position += 1;
+    // Get card width including gap
+    const getCardWidth = () => {
+      const card = row.querySelector('.match-card');
+      if (!card) return 350;
+      return card.getBoundingClientRect().width + 18; // 18px gap
+    };
+    
+    let cardWidth = getCardWidth();
+    let maxScroll = cardWidth * originalCards.length;
+    
+    // Smooth auto-scroll function
+    function autoScroll() {
+      if (!isScrolling) return;
       
-      // When we've scrolled past the first set, reset to beginning seamlessly
-      if (position >= cardWidth * originalCards.length) {
-        position = 0;
+      row.scrollLeft += scrollSpeed;
+      
+      // Reset position seamlessly when we've scrolled past first set
+      if (row.scrollLeft >= maxScroll) {
         row.scrollLeft = 0;
       }
       
-      row.scrollLeft = position;
+      animationId = requestAnimationFrame(autoScroll);
     }
     
-    // 60fps smooth scrolling
-    setInterval(smoothScroll, 16);
+    // Manual scroll functions
+    function scrollNext() {
+      const scrollAmount = cardWidth;
+      row.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+    
+    function scrollPrev() {
+      const scrollAmount = -cardWidth;
+      row.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+    
+    // Pause on hover
+    row.addEventListener('mouseenter', () => {
+      isScrolling = false;
+      if (animationId) cancelAnimationFrame(animationId);
+    });
+    
+    row.addEventListener('mouseleave', () => {
+      isScrolling = true;
+      autoScroll();
+    });
+    
+    // Button controls
+    if (nextBtn) nextBtn.addEventListener('click', scrollNext);
+    if (prevBtn) prevBtn.addEventListener('click', scrollPrev);
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      cardWidth = getCardWidth();
+      maxScroll = cardWidth * originalCards.length;
+    });
+    
+    // Start auto-scroll
+    autoScroll();
+    
+    // Intersection Observer for card animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('card-show');
+        }
+      });
+    }, observerOptions);
+    
+    // Observe all cards for entrance animations
+    document.querySelectorAll('.match-card').forEach(card => {
+      card.classList.add('card-hidden');
+      cardObserver.observe(card);
+    });
   });
 </script>
 {% endblock %}
