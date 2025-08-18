@@ -5,23 +5,23 @@ from flask_sqlalchemy import SQLAlchemy
 import os
 from markupsafe import escape
 from sqlalchemy import text
+from config import Config
+from dotenv import load_dotenv
 # render_template: Used to display HTML pages
 # request: Handles data sent from forms
 # redirect: Sends users to different pages
 # url_for: Creates URLs for our routes
 # flash: Shows temporary messages to users
 
+# Load environment variables from .env file
+load_dotenv()
+
 app = Flask(__name__)
 # Create a Flask application instance
 # __name__ tells Flask where to look for templates and static files
 
-app.secret_key = 'PASSWORD'
-# Secret key is needed for flash messages and session management
-# In production, you'd use a more secure random key
-
-# Set up SQLAlchemy
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///grounds.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Load configuration
+app.config.from_object(Config)
 
 db = SQLAlchemy(app)
 
@@ -36,6 +36,12 @@ class Ground(db.Model):
     host_email = db.Column(db.String(120), nullable=False)
     materials = db.Column(db.String(300), nullable=True)  # Comma-separated list
     ground_use = db.Column(db.String(50), nullable=True)
+    # New Google Maps location fields
+    latitude = db.Column(db.Float, nullable=True)
+    longitude = db.Column(db.Float, nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    postal_code = db.Column(db.String(20), nullable=True)
+    full_address = db.Column(db.String(300), nullable=True)
 
 # Persistent users for players/hosts with age stored
 class User(db.Model):
@@ -242,18 +248,36 @@ def signup_host():
             phone = escape(request.form.get('phone', '').strip())
             password = request.form.get('password')
             ground_name = escape(request.form.get('ground_name', '').strip())
-            ground_location = escape(request.form.get('ground_location', '').strip())
             rate = request.form.get('rate')
             materials = [escape(m.strip()) for m in request.form.getlist('materials')]
             ground_use = escape(request.form.get('ground_use', '').strip())
+            
+            # New Google Maps location fields
+            city = escape(request.form.get('city', '').strip())
+            postal_code = escape(request.form.get('postal_code', '').strip())
+            full_address = escape(request.form.get('full_address', '').strip())
+            latitude = request.form.get('latitude')
+            longitude = request.form.get('longitude')
 
             # Validate required fields
-            if not all([name, age, email, phone, password, ground_name, ground_location, rate, ground_use]):
+            if not all([name, age, email, phone, password, ground_name, rate, ground_use, city, postal_code, latitude, longitude]):
                 flash('All fields are required.', 'danger')
                 return render_template('signup_host.html')
             if not password:
                 flash('Password is required.', 'danger')
                 return render_template('signup_host.html')
+                
+            # Validate coordinates
+            try:
+                lat_float = float(latitude)
+                lng_float = float(longitude)
+                if not (-90 <= lat_float <= 90) or not (-180 <= lng_float <= 180):
+                    flash('Please enter valid coordinates (Latitude: -90 to 90, Longitude: -180 to 180).', 'danger')
+                    return render_template('signup_host.html')
+            except ValueError:
+                flash('Please enter valid numeric coordinates.', 'danger')
+                return render_template('signup_host.html')
+                
             try:
                 if age is None or age == '':
                     raise ValueError('Age is required')
@@ -288,13 +312,19 @@ def signup_host():
             img = 'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=400&q=80'
             new_ground = Ground(
                 name=ground_name,
-                location=ground_location,
+                location=city,  # Keep location field for backward compatibility
                 rate=rate_int,
                 img=img,
                 published=False,
                 host_email=email,
                 materials=','.join(materials),
-                ground_use=ground_use
+                ground_use=ground_use,
+                # New Google Maps location fields
+                city=city,
+                postal_code=postal_code,
+                full_address=full_address,
+                latitude=lat_float,
+                longitude=lng_float
             )
             db.session.add(new_ground)
             db.session.commit()
@@ -428,9 +458,28 @@ def player_home():
 def grounds():
     # Show only published grounds to all users
     grounds_list = Ground.query.filter_by(published=True).all()
+    # Convert Ground objects to dictionaries for JSON serialization
+    grounds_dict = []
+    for ground in grounds_list:
+        grounds_dict.append({
+            'id': ground.id,
+            'name': ground.name,
+            'location': ground.location,
+            'rate': ground.rate,
+            'img': ground.img,
+            'published': ground.published,
+            'host_email': ground.host_email,
+            'materials': ground.materials,
+            'ground_use': ground.ground_use,
+            'latitude': ground.latitude,
+            'longitude': ground.longitude,
+            'city': ground.city,
+            'postal_code': ground.postal_code,
+            'full_address': ground.full_address
+        })
     is_host = session.get('user_type') == 'host'
     is_player = session.get('user_type') == 'player'
-    return render_template('grounds.html', grounds=grounds_list, is_host=is_host, is_player=is_player)
+    return render_template('grounds.html', grounds=grounds_list, grounds_json=grounds_dict, is_host=is_host, is_player=is_player)
 
 @app.route('/grounds/host')
 def grounds_host():
@@ -445,7 +494,48 @@ def grounds_host():
     host_ground = next((g for g in host_grounds if not g.published), None)
     # Only show published grounds in the main list
     published_grounds = [g for g in host_grounds if g.published]
-    return render_template('grounds_host.html', grounds=published_grounds, host_ground=host_ground)
+    
+    # Convert Ground objects to dictionaries for JSON serialization
+    published_grounds_dict = []
+    for ground in published_grounds:
+        published_grounds_dict.append({
+            'id': ground.id,
+            'name': ground.name,
+            'location': ground.location,
+            'rate': ground.rate,
+            'img': ground.img,
+            'published': ground.published,
+            'host_email': ground.host_email,
+            'materials': ground.materials,
+            'ground_use': ground.ground_use,
+            'latitude': ground.latitude,
+            'longitude': ground.longitude,
+            'city': ground.city,
+            'postal_code': ground.postal_code,
+            'full_address': ground.full_address
+        })
+    
+    # Convert host_ground to dictionary if it exists
+    host_ground_dict = None
+    if host_ground:
+        host_ground_dict = {
+            'id': host_ground.id,
+            'name': host_ground.name,
+            'location': host_ground.location,
+            'rate': host_ground.rate,
+            'img': host_ground.img,
+            'published': host_ground.published,
+            'host_email': host_ground.host_email,
+            'materials': host_ground.materials,
+            'ground_use': host_ground.ground_use,
+            'latitude': host_ground.latitude,
+            'longitude': host_ground.longitude,
+            'city': host_ground.city,
+            'postal_code': host_ground.postal_code,
+            'full_address': host_ground.full_address
+        }
+    
+    return render_template('grounds_host.html', grounds=published_grounds, grounds_json=published_grounds_dict, host_ground=host_ground, host_ground_json=host_ground_dict)
 
 @app.route('/ground/<int:ground_id>')
 def ground_detail(ground_id):

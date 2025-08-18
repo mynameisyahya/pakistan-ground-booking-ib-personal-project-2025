@@ -11,4 +11,9 @@ Werkzeug==2.3.7
 # Werkzeug provides security features like password hashing - we'll use this for secure passwords
 
 python-dotenv==1.0.0
-# python-dotenv helps us manage environment variables (like secret keys) safely 
+# python-dotenv helps us manage environment variables (like secret keys) safely
+
+# Maps Integration:
+# - Uses OpenStreetMap with Leaflet (no API key required)
+# - Completely free and open-source
+# - No usage limits or restrictions 

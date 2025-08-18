@@ -25,7 +25,7 @@
         border-radius: 15px;
         box-shadow: 0 8px 32px rgba(13,59,102,0.15);
         padding: 40px;
-        max-width: 500px;
+        max-width: 600px;
         margin: 60px auto;
         border: 1px solid rgba(244,211,94,0.3);
     }
@@ -43,6 +43,41 @@
     }
     .btn-primary:hover {
         background: var(--yale-blue-600);
+        color: var(--lemon-chiffon-900);
+    }
+    .location-section {
+        background: rgba(244,211,94,0.1);
+        border-radius: 10px;
+        padding: 20px;
+        margin: 20px 0;
+        border: 1px solid rgba(244,211,94,0.2);
+    }
+    .location-section h5 {
+        color: var(--yale-blue);
+        margin-bottom: 15px;
+    }
+    .coordinates-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .map-preview {
+        height: 200px;
+        border-radius: 8px;
+        border: 1px solid rgba(244,211,94,0.3);
+        margin-top: 15px;
+        background: #f8f9fa;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--yale-blue-400);
+    }
+    .btn-outline-secondary {
+        border-color: var(--yale-blue-400);
+        color: var(--yale-blue-400);
+    }
+    .btn-outline-secondary:hover {
+        background: var(--yale-blue-400);
         color: var(--lemon-chiffon-900);
     }
 </style>
@@ -89,43 +124,230 @@
             <label for="profile_image_url" class="form-label">Profile Picture URL (optional)</label>
             <input type="url" class="form-control" id="profile_image_url" name="profile_image_url" placeholder="https://...">
         </div>
-        <div class="mb-3">
-            <label for="ground_name" class="form-label">Ground Name</label>
-            <input type="text" class="form-control" id="ground_name" name="ground_name" required>
-        </div>
-        <div class="mb-3">
-            <label for="ground_location" class="form-label">Ground Location</label>
-            <input type="text" class="form-control" id="ground_location" name="ground_location" required>
-        </div>
-        <div class="mb-3">
-            <label for="rate" class="form-label">Rate per Hour (PKR)</label>
-            <input type="number" class="form-control" id="rate" name="rate" min="0" required>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Materials Provided</label><br>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="football" name="materials" value="Football">
-                <label class="form-check-label" for="football">Football</label>
+        
+        <!-- Ground Information Section -->
+        <div class="location-section">
+            <h5>🏟️ Ground Information</h5>
+            <div class="mb-3">
+                <label for="ground_name" class="form-label">Ground Name</label>
+                <input type="text" class="form-control" id="ground_name" name="ground_name" required>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="goalpost" name="materials" value="Goal Post">
-                <label class="form-check-label" for="goalpost">Goal Post</label>
+            <div class="mb-3">
+                <label for="rate" class="form-label">Rate per Hour (PKR)</label>
+                <input type="number" class="form-control" id="rate" name="rate" min="0" required>
             </div>
-            <div class="form-check form-check-inline">
-                <input class="form-check-input" type="checkbox" id="tennisball" name="materials" value="Tennis Ball">
-                <label class="form-check-label" for="tennisball">Tennis Ball</label>
+            <div class="mb-3">
+                <label class="form-label">Materials Provided</label><br>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="football" name="materials" value="Football">
+                    <label class="form-check-label" for="football">Football</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="goalpost" name="materials" value="Goal Post">
+                    <label class="form-check-label" for="goalpost">Goal Post</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="tennisball" name="materials" value="Tennis Ball">
+                    <label class="form-check-label" for="tennisball">Tennis Ball</label>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="ground_use" class="form-label">Ground Mainly Used For</label>
+                <select class="form-control" id="ground_use" name="ground_use" required>
+                    <option value="">Select...</option>
+                    <option value="Football">Football</option>
+                    <option value="Cricket">Cricket</option>
+                    <option value="Padel">Padel</option>
+                </select>
             </div>
         </div>
-        <div class="mb-3">
-            <label for="ground_use" class="form-label">Ground Mainly Used For</label>
-            <select class="form-select" id="ground_use" name="ground_use" required>
-                <option value="">Select...</option>
-                <option value="Football">Football</option>
-                <option value="Cricket">Cricket</option>
-                <option value="Padel">Padel</option>
-            </select>
+
+        <!-- Location Information Section -->
+        <div class="location-section">
+            <h5>📍 Location Information</h5>
+            <div class="mb-3">
+                <label for="city" class="form-label">City *</label>
+                <input type="text" class="form-control" id="city" name="city" required placeholder="e.g., Islamabad, Karachi, Lahore">
+            </div>
+            <div class="mb-3">
+                <label for="postal_code" class="form-label">Postal Code *</label>
+                <input type="text" class="form-control" id="postal_code" name="postal_code" required placeholder="e.g., 44000">
+            </div>
+            <div class="mb-3">
+                <label for="full_address" class="form-label">Full Address (optional but recommended)</label>
+                <textarea class="form-control" id="full_address" name="full_address" rows="2" placeholder="Enter the complete address for better location accuracy"></textarea>
+            </div>
+            
+            <!-- Coordinate Input Section -->
+            <div class="mb-3">
+                <label class="form-label">Coordinates *</label>
+                <div class="coordinates-row">
+                    <div>
+                        <label for="latitude" class="form-label small">Latitude</label>
+                        <input type="number" class="form-control" id="latitude" name="latitude" step="0.000001" required placeholder="e.g., 33.6844">
+                    </div>
+                    <div>
+                        <label for="longitude" class="form-label small">Longitude</label>
+                        <input type="number" class="form-control" id="longitude" name="longitude" step="0.000001" required placeholder="e.g., 73.0479">
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="getCoordinatesBtn">
+                        🗺️ Get Coordinates from Address
+                    </button>
+                    <small class="text-muted d-block mt-1">Click to automatically get coordinates from the address above</small>
+                </div>
+            </div>
+
+            <!-- Map Preview -->
+            <div class="map-preview" id="mapPreview">
+                <div class="text-center">
+                    <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                    <div>Map preview will appear here</div>
+                    <small>Enter coordinates above to see the location</small>
+                </div>
+            </div>
         </div>
+
         <button type="submit" class="btn btn-primary w-100">Sign Up</button>
     </form>
 </div>
+
+<!-- OpenStreetMap with Leaflet (No API key required) -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cityInput = document.getElementById('city');
+    const postalCodeInput = document.getElementById('postal_code');
+    const fullAddressInput = document.getElementById('full_address');
+    const latitudeInput = document.getElementById('latitude');
+    const longitudeInput = document.getElementById('longitude');
+    const getCoordinatesBtn = document.getElementById('getCoordinatesBtn');
+    const mapPreview = document.getElementById('mapPreview');
+
+    // Initialize OpenStreetMap
+    let map, marker;
+
+    // Function to update map preview
+    function updateMapPreview() {
+        const lat = parseFloat(latitudeInput.value);
+        const lng = parseFloat(longitudeInput.value);
+        
+        if (isNaN(lat) || isNaN(lng)) {
+            mapPreview.innerHTML = `
+                <div class="text-center">
+                    <i class="fas fa-map-marker-alt fa-2x mb-2"></i>
+                    <div>Map preview will appear here</div>
+                    <small>Enter coordinates above to see the location</small>
+                </div>
+            `;
+            return;
+        }
+
+        // Clear previous map
+        mapPreview.innerHTML = '';
+
+        // Create map
+        map = L.map(mapPreview).setView([lat, lng], 15);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        
+        // Add marker
+        marker = L.marker([lat, lng], { draggable: true }).addTo(map);
+        
+        // Add popup
+        marker.bindPopup('<div><strong>Ground Location</strong><br>Click to open in OpenStreetMap</div>');
+        
+        // Update coordinates when marker is dragged
+        marker.on('dragend', function() {
+            const position = marker.getLatLng();
+            latitudeInput.value = position.lat.toFixed(6);
+            longitudeInput.value = position.lng.toFixed(6);
+        });
+
+        // Make map clickable to open in OpenStreetMap
+        map.on('click', () => {
+            window.open(`https://www.openstreetmap.org/?mlat=${lat}&mlon=${lng}&zoom=16&layers=M`, '_blank');
+        });
+    }
+
+    // Get coordinates from address using OpenStreetMap Nominatim (free, no API key required)
+    getCoordinatesBtn.addEventListener('click', function() {
+        const address = [fullAddressInput.value, cityInput.value, postalCodeInput.value]
+            .filter(Boolean)
+            .join(', ');
+        
+        if (!address.trim()) {
+            alert('Please enter at least city and postal code to get coordinates.');
+            return;
+        }
+
+        getCoordinatesBtn.disabled = true;
+        getCoordinatesBtn.innerHTML = '🔍 Searching...';
+
+        // Use OpenStreetMap Nominatim API for geocoding
+        const nominatimUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(address)}&limit=1`;
+        
+        fetch(nominatimUrl)
+            .then(response => response.json())
+            .then(data => {
+                getCoordinatesBtn.disabled = false;
+                getCoordinatesBtn.innerHTML = '🗺️ Get Coordinates from Address';
+
+                if (data && data.length > 0) {
+                    const location = data[0];
+                    const lat = parseFloat(location.lat);
+                    const lng = parseFloat(location.lon);
+                    
+                    latitudeInput.value = lat;
+                    longitudeInput.value = lng;
+                    updateMapPreview();
+                    
+                    // Update address fields
+                    updateAddressFields(location);
+                    
+                    alert('Coordinates found! Please verify the location on the map.');
+                } else {
+                    alert('Could not find coordinates for this address. Please enter coordinates manually.');
+                }
+            })
+            .catch(error => {
+                console.error('Geocoding error:', error);
+                getCoordinatesBtn.disabled = false;
+                getCoordinatesBtn.innerHTML = '🗺️ Get Coordinates from Address';
+                alert('Could not find coordinates for this address. Please enter coordinates manually.');
+            });
+    });
+
+    function updateAddressFields(geocodeResult) {
+        // Extract city and postal code from Nominatim result
+        if (geocodeResult.address) {
+            if (geocodeResult.address.city) {
+                cityInput.value = geocodeResult.address.city;
+            } else if (geocodeResult.address.town) {
+                cityInput.value = geocodeResult.address.town;
+            } else if (geocodeResult.address.state) {
+                cityInput.value = geocodeResult.address.state;
+            }
+            
+            if (geocodeResult.address.postcode) {
+                postalCodeInput.value = geocodeResult.address.postcode;
+            }
+        }
+    }
+
+    // Update map when coordinates change
+    latitudeInput.addEventListener('input', updateMapPreview);
+    longitudeInput.addEventListener('input', updateMapPreview);
+
+    // Pakistan default coordinates (Islamabad)
+    latitudeInput.value = '33.6844';
+    longitudeInput.value = '73.0479';
+    updateMapPreview();
+});
+</script>
 {% endblock %} 
