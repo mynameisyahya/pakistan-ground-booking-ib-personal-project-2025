@@ -1,18 +1,47 @@
 {% extends "base.html" %}
 
-{% block title %}PlayNow - Find a game{% endblock %}
+{% block title %}Active Arena - Find a game{% endblock %}
 
 {% block extra_css %}
-<style>
+    <style>
     /* Light, punchy Pakistan-inspired theme */
-    :root{--pk-green:#0aa34f; --pk-deep:#0b6b3a; --pk-gold:#ffb703; --muted:#6b7280; --paper:#f7f8fc; --card:#ffffff}
-    .hero{padding:56px 0 16px}
-    .hero h1{font-weight:900;letter-spacing:.2px;color:var(--pk-deep)}
-    .row-scroller{display:grid;grid-auto-flow:column;grid-auto-columns:calc(33% - 14px);gap:18px;overflow-x:auto;padding-bottom:10px;scroll-snap-type:x mandatory}
+    :root{--brand-1:#7b61ff;--brand-2:#00d4ff;--accent-1:#ff5a7a;--muted:#64748b;--card:#ffffff}
+    .hero{position:relative;padding:56px 0 0}
+    /* Dynamic background: mesh + ribbons + floaters */
+    .bg-scene{position:absolute;inset:-60px -60px auto -60px;height:72vh;min-height:380px;z-index:-2;overflow:hidden;border-radius:0 0 28px 28px}
+    .bg-mesh{position:absolute;inset:0;background:
+        radial-gradient(60% 60% at 10% 10%, rgba(123,97,255,.22), transparent 60%),
+        radial-gradient(60% 60% at 90% 20%, rgba(0,212,255,.22), transparent 60%),
+        radial-gradient(50% 50% at 20% 90%, rgba(255,90,122,.18), transparent 60%),
+        radial-gradient(50% 50% at 80% 80%, rgba(0,212,255,.18), transparent 60%),
+        linear-gradient(180deg,#fbfdff,#f3f7fb)}
+    .float-layer{position:absolute;inset:0;pointer-events:none}
+    .float{position:absolute;font-size:28px;filter:drop-shadow(0 8px 20px rgba(16,24,40,.18));opacity:.9;animation:drift var(--dur,12s) linear infinite}
+    @keyframes drift{from{transform:translate3d(var(--x,0),120%,0) rotate(0)}to{transform:translate3d(calc(var(--x,0) + 0px),-120%,0) rotate(360deg)}}
+    /* Animated gradient ribbons for flair */
+    .hero .ribbon{position:absolute;inset:0;pointer-events:none;z-index:-1;mask-image:linear-gradient(to bottom, rgba(0,0,0,.8), rgba(0,0,0,0));}
+    .hero .ribbon:before{content:"";position:absolute;left:-20%;right:-20%;top:-30%;height:260px;background:conic-gradient(from var(--ang,0deg), #0aa34f, #15c26f, #ffb703, #0aa34f);filter:blur(30px);opacity:.25;animation:spin 18s linear infinite}
+    @keyframes spin{to{--ang:1turn}}
+    /* Floating orbs */
+    .hero:before,.hero:after{content:"";position:absolute;inset:auto auto 10% -10%;width:320px;height:320px;background:radial-gradient(closest-side, rgba(10,163,79,.25), transparent);filter:blur(20px);border-radius:50%;animation:floatA 14s ease-in-out infinite alternate}
+    .hero:after{left:auto;right:-8%;bottom:18%;background:radial-gradient(closest-side, rgba(255,183,3,.25), transparent);animation:floatB 16s ease-in-out infinite alternate}
+    @keyframes floatA{from{transform:translateY(0)}to{transform:translateY(-18px)}}
+    @keyframes floatB{from{transform:translateY(0)}to{transform:translateY(22px)}}
+    .hero h1{font-weight:900;letter-spacing:.2px;color:#0f172a;position:relative}
+    .hero h1:after{content:"";display:block;width:78px;height:6px;background:linear-gradient(90deg,var(--brand-1),var(--brand-2));border-radius:999px;margin-top:8px}
+    .row-wrap{position:relative}
+    .row-wrap:before,.row-wrap:after{content:"";position:absolute;top:0;bottom:0;width:80px;pointer-events:none;z-index:2}
+    .row-wrap:before{left:0;background:linear-gradient(90deg, rgba(249,251,255,1), rgba(249,251,255,0))}
+    .row-wrap:after{right:0;background:linear-gradient(270deg, rgba(249,251,255,1), rgba(249,251,255,0))}
+    .row-scroller{display:grid;grid-auto-flow:column;grid-auto-columns:calc(33% - 14px);gap:18px;overflow-x:auto;padding:10px 0 18px;scroll-snap-type:x mandatory;scroll-behavior:smooth}
     .row-scroller::-webkit-scrollbar{display:none}
-    .match-card{background:var(--card);border:1px solid rgba(0,0,0,.06);border-radius:20px;overflow:hidden;transition:transform .2s ease, box-shadow .2s ease;scroll-snap-align:start;box-shadow:0 16px 40px rgba(16,24,40,.08)}
-    .match-card:hover{transform:translateY(-4px);box-shadow:0 20px 50px rgba(16,24,40,.12)}
-    .match-thumb{height:260px;object-fit:cover;width:100%}
+    .match-card{background:var(--card);border:1px solid rgba(0,0,0,.06);border-radius:20px;overflow:hidden;transition:transform .25s ease, box-shadow .25s ease;scroll-snap-align:start;box-shadow:0 16px 40px rgba(16,24,40,.08);transform-style:preserve-3d}
+    .match-card:hover{transform:translateY(-4px) scale(1.01);box-shadow:0 24px 60px rgba(16,24,40,.14)}
+    .match-thumb-wrap{position:relative}
+    .match-thumb{height:260px;object-fit:cover;width:100%;display:block}
+    .live-dot{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.55);color:#fff;padding:4px 10px;border-radius:999px;font-size:.8rem}
+    .live-dot i{width:8px;height:8px;background:var(--accent-1);border-radius:50%;box-shadow:0 0 0 6px rgba(255,90,122,.25);animation:pulse 1.4s infinite}
+    @keyframes pulse{0%{transform:scale(1)}70%{transform:scale(1.4);opacity:.6}100%{transform:scale(1);opacity:1}}
     .match-body{padding:14px}
     .muted{color:var(--muted)}
     .option-card{background:#fff;border:1px solid rgba(0,0,0,.06);border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:12px;color:#111827;text-decoration:none;box-shadow:0 10px 30px rgba(16,24,40,.08)}
@@ -20,38 +49,97 @@
     .pills .btn{border-radius:999px}
     .pill-light{background:#e8f5ee;border:none;color:var(--pk-deep)}
     @media (max-width:900px){.row-scroller{grid-auto-columns:80%}}
-</style>
+    /* Hero showcase (parallax cards) */
+    .showcase{position:relative;overflow:hidden;border-radius:24px;box-shadow:0 24px 70px rgba(16,24,40,.18);height:52vh;min-height:340px;margin-bottom:24px}
+    .showcase-layer{position:absolute;inset:0;background-position:center;background-size:cover;filter:saturate(1.1) contrast(1.05)}
+    .showcase-layer.layer1{animation:slow-pan 22s linear infinite alternate}
+    .showcase-layer.layer2{opacity:.28;mix-blend-mode:multiply;animation:slow-pan 28s linear infinite alternate-reverse}
+    .showcase-layer.gradient{background:radial-gradient(120% 100% at 70% 0%, rgba(255,255,255,.0), rgba(249,251,255,.85) 68%), linear-gradient(180deg, rgba(249,251,255,.0), rgba(249,251,255,.95) 60%)}
+    @keyframes slow-pan{from{transform:scale(1.1) translateX(-2%)}to{transform:scale(1.18) translateX(2%)}}
+    .showcase-content{position:absolute;inset:auto 0 0 0;padding:28px;display:flex;justify-content:space-between;align-items:end}
+    .showcase-title{font-weight:900;font-size:clamp(24px,3.6vw,42px);color:#0b6b3a}
+    .ticker{white-space:nowrap;overflow:hidden;border-top:1px solid rgba(0,0,0,.06)}
+    .ticker .track{display:inline-block;padding:10px 0;animation:ticker 28s linear infinite}
+    .ticker span{display:inline-block;margin-right:22px;padding:6px 12px;border-radius:999px;background:#e8f5ee;color:#0b6b3a;font-weight:600}
+    @keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+    /* Dramatic reveals */
+    .card-hidden{opacity:0;transform:translateY(18px);transition:opacity .45s ease, transform .45s ease}
+    .card-show{opacity:1;transform:none}
+    /* Confetti canvas */
+    #fxCanvas{position:fixed;inset:0;pointer-events:none;z-index:999}
+    </style>
 {% endblock %}
 
 {% block content %}
 <div class="app-container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            <div class="mt-3">
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                {% endfor %}
-            </div>
-        {% endif %}
-    {% endwith %}
-
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mt-3">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'danger' else 'success' }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
     <div class="hero">
+        <div class="bg-scene">
+            <div class="bg-mesh"></div>
+            <div class="float-layer">
+                <div class="float" style="left:8%; --x:-40px; --dur:16s">⚽</div>
+                <div class="float" style="left:18%; --x:10px; --dur:14s">🔥</div>
+                <div class="float" style="left:32%; --x:-20px; --dur:18s">💥</div>
+                <div class="float" style="left:52%; --x:0px; --dur:12s">⚽</div>
+                <div class="float" style="left:68%; --x:30px; --dur:17s">💨</div>
+                <div class="float" style="left:84%; --x:-10px; --dur:15s">⭐</div>
+            </div>
+        </div>
+        <div class="ribbon"></div>
+        <!-- Cinematic hero showcase -->
+        <div class="showcase mb-4">
+            <div class="showcase-layer layer1" style="background-image:url('https://images.unsplash.com/photo-1593341646649-2f9b89d559f1?q=80&w=1600&auto=format&fit=crop');"></div>
+            <div class="showcase-layer layer2" style="background-image:url('https://images.unsplash.com/photo-1522778119026-d647f0596c20?q=80&w=1600&auto=format&fit=crop');"></div>
+            <div class="showcase-layer gradient"></div>
+            <div class="showcase-content">
+                <div>
+                    <div class="showcase-title">Pakistan’s games, happening now.</div>
+                    <div class="muted">Pick a ground. Join a squad. Play.</div>
+                        </div>
+                <div class="d-flex gap-2">
+                    <a href="{{ url_for('grounds') }}" class="btn btn-primary">Find games</a>
+                    {% if not session.get('user_type') %}
+                    <a href="{{ url_for('signup_player') }}" class="btn btn-outline-light">Sign up</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="ticker mb-3">
+            <div class="track">
+                <span>Islamabad</span><span>Lahore</span><span>Karachi</span><span>Rawalpindi</span><span>Multan</span><span>Peshawar</span><span>Quetta</span><span>Faisalabad</span>
+                <span>Islamabad</span><span>Lahore</span><span>Karachi</span><span>Rawalpindi</span><span>Multan</span><span>Peshawar</span><span>Quetta</span><span>Faisalabad</span>
+            </div>
+        </div>
         <h1>Find a game. Join instantly.</h1>
         <div class="muted mb-3">Browse live matches across grounds. Log in only when you hit join.</div>
         <div class="d-flex gap-2 pills mb-3">
             <button class="btn pill-light btn-sm">Football</button>
             <button class="btn pill-light btn-sm">Cricket</button>
             <button class="btn pill-light btn-sm">Trending</button>
-        </div>
+                        </div>
         {% if lobby_cards %}
         <h5 class="mb-2">Ongoing games</h5>
-        <div class="row-scroller mb-4">
+        <div class="row-wrap mb-4">
+        <button class="btn btn-outline-light btn-sm position-absolute top-50 start-0 translate-middle-y z-1" id="prevBtn" style="backdrop-filter:blur(6px);">‹</button>
+        <div class="row-scroller" id="ongoingRow">
             {% for c in lobby_cards %}
             <div class="match-card">
-                <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1200&q=60' }}" alt="{{ c.ground.name }}">
+                <div class="match-thumb-wrap">
+                    <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60' }}" alt="{{ c.ground.name }}">
+                    <div class="live-dot"><i></i> Live</div>
+                </div>
                 <div class="match-body">
                     <div class="d-flex justify-content-between align-items-center">
                         <div>
@@ -67,6 +155,8 @@
             </div>
             {% endfor %}
         </div>
+        <button class="btn btn-outline-light btn-sm position-absolute top-50 end-0 translate-middle-y z-1" id="nextBtn" style="backdrop-filter:blur(6px);">›</button>
+        </div>
         {% endif %}
         <div class="d-flex gap-2">
             <a href="{{ url_for('grounds') }}" class="btn btn-primary">Browse grounds</a>
@@ -77,4 +167,50 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Auto-scroll the ongoing row for a dynamic feel; pause on hover
+  (function(){
+    const row = document.getElementById('ongoingRow');
+    const prev = document.getElementById('prevBtn');
+    const next = document.getElementById('nextBtn');
+    if(!row) return;
+    let idx = 0, paused = false;
+    row.addEventListener('mouseenter', ()=> paused=true);
+    row.addEventListener('mouseleave', ()=> paused=false);
+    setInterval(()=>{
+      if(paused) return;
+      const cards = row.children;
+      if(!cards.length) return;
+      const w = cards[0].getBoundingClientRect().width + 18; // card width + gap
+      row.scrollBy({ left: w, behavior: 'smooth' });
+      idx++;
+      if(idx % cards.length === 0){ row.scrollTo({ left: 0, behavior: 'smooth' }); }
+    }, 2800);
+
+    function scrollByCards(n){
+      const cards = row.children; if(!cards.length) return;
+      const w = cards[0].getBoundingClientRect().width + 18;
+      row.scrollBy({ left: w * n, behavior: 'smooth' });
+    }
+    prev && prev.addEventListener('click', ()=> scrollByCards(-1));
+    next && next.addEventListener('click', ()=> scrollByCards(1));
+
+    // Subtle 3D tilt
+    row.addEventListener('mousemove', (e)=>{
+      const target = e.target.closest('.match-card');
+      if(!target) return;
+      const r = target.getBoundingClientRect();
+      const cx = e.clientX - r.left, cy = e.clientY - r.top;
+      const rx = (cy/r.height - .5) * -6;
+      const ry = (cx/r.width - .5) * 6;
+      target.style.transform = `perspective(700px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    });
+    row.addEventListener('mouseleave', ()=>{
+      [...row.querySelectorAll('.match-card')].forEach(c=> c.style.transform = '');
+    });
+  })();
+</script>
 {% endblock %}
