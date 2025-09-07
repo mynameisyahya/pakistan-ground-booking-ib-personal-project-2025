@@ -91,8 +91,14 @@
         .nav-link:hover{color:var(--yale-blue) !important}
         .btn-primary{background:var(--yale-blue);border:none;color:var(--lemon-chiffon-900)}
         .btn-primary:hover{background:var(--yale-blue-600);color:var(--lemon-chiffon-900)}
+        .btn-outline-primary{border:2px solid var(--yale-blue);color:var(--yale-blue);background:transparent}
+        .btn-outline-primary:hover{background:var(--yale-blue);color:var(--lemon-chiffon-900);border-color:var(--yale-blue)}
         .btn-outline-light{border-color:rgba(13,59,102,.2);color:var(--yale-blue-400)}
         .btn-outline-light:hover{background:rgba(13,59,102,.08);color:var(--yale-blue)}
+        .btn-success{background:var(--yale-blue);border:none;color:var(--lemon-chiffon-900)}
+        .btn-success:hover{background:var(--yale-blue-600);color:var(--lemon-chiffon-900)}
+        .btn-danger{background:var(--tomato);border:none;color:var(--lemon-chiffon-900)}
+        .btn-danger:hover{background:var(--tomato-600);color:var(--lemon-chiffon-900)}
         .app-container{max-width:1280px;padding:28px;margin:0 auto}
         .breadcrumb{display:none}
         .card-clean{background:var(--card);border:1px solid rgba(13,59,102,.08);border-radius:16px;box-shadow:0 8px 28px rgba(13,59,102,.08)}
@@ -152,8 +158,8 @@
                         </li>
                     {% else %}
                         <li class="nav-item"><a class="btn btn-outline-light btn-sm" href="{{ url_for('login') }}">Log in</a></li>
-                        <li class="nav-item d-none d-sm-block"><a class="btn btn-primary btn-sm" href="{{ url_for('signup_player') }}">Sign up Player</a></li>
-                        <li class="nav-item d-none d-sm-block"><a class="btn btn-primary btn-sm" href="{{ url_for('signup_host') }}">Sign up Host</a></li>
+                        <li class="nav-item d-none d-sm-block"><a class="btn btn-primary btn-sm" href="{{ url_for('signup_player') }}">👤 Player</a></li>
+                        <li class="nav-item d-none d-sm-block"><a class="btn btn-outline-primary btn-sm" href="{{ url_for('signup_host') }}">🏟️ Host</a></li>
                     {% endif %}
                 </ul>
             </div>
