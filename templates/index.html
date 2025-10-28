@@ -487,19 +487,6 @@
                 </div>
             </div>
         </div>
-        <div class="showcase-layer" style="background: rgba(0,0,0,0.2);"></div>
-        <div class="showcase-content">
-            <div>
-                <div class="showcase-title">Active Arena</div>
-                <div class="muted">Pick a ground. Join a squad. Play.</div>
-            </div>
-            <div class="d-flex gap-2">
-                <a href="{{ url_for('grounds') }}" class="btn btn-primary">Find games</a>
-                {% if not session.get('user_type') %}
-                <a href="{{ url_for('signup_player') }}" class="btn btn-outline-light">Sign up</a>
-                {% endif %}
-            </div>
-        </div>
     </div>
     <div class="ticker mb-3">
         <div class="track">
@@ -580,13 +567,6 @@
     </div>
     <button class="btn btn-outline-light btn-sm position-absolute top-50 end-0 translate-middle-y z-1" id="nextBtn" style="backdrop-filter:blur(6px);">›</button>
     </div>
-    <div class="d-flex gap-2">
-        <a href="{{ url_for('grounds') }}" class="btn btn-primary">Browse grounds</a>
-        {% if not session.get('user_type') %}
-        <a href="{{ url_for('signup_player') }}" class="option-card">👤 <span>Sign up as player</span></a>
-        <a href="{{ url_for('signup_host') }}" class="option-card">🏟️ <span>Sign up as host</span></a>
-        {% endif %}
-    </div>
     <!-- Features Section -->
     <div class="container py-5">
         <div class="text-center mb-5">
@@ -625,86 +605,6 @@
         </div>
     </div>
     
-    <!-- Trending Matches Section -->
-    <div class="container py-5">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold" style="color: var(--text-light);">Trending Matches</h2>
-            <a href="{{ url_for('grounds') }}" class="btn btn-sm btn-outline-primary">View All</a>
-        </div>
-        
-        <div class="row-wrap">
-            <div class="row-scroller" id="trendingRow">
-                <!-- Match cards will be dynamically loaded here -->
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195d86?q=80&w=800&auto=format&fit=crop" alt="Football Match" class="match-thumb">
-                        <div class="live-dot"><i></i> LIVE</div>
-                    </div>
-                    <div class="match-body">
-                        <h3 class="match-title">5-a-side Tournament</h3>
-                        <div class="match-meta">
-                            <span><i class="fas fa-map-marker-alt"></i> Karachi</span>
-                            <span><i class="far fa-calendar"></i> Today, 6:00 PM</span>
-                        </div>
-                        <div class="pills">
-                            <span class="badge bg-dark text-white me-1">5v5</span>
-                            <span class="badge bg-dark text-white me-1">Turf</span>
-                            <span class="badge bg-success">3 spots left</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="text-success fw-bold">PKR 1,500/player</span>
-                            <a href="#" class="btn btn-sm btn-primary">Join Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img src="https://images.unsplash.com/photo-1575361204480-aadea25e6e68?q=80&w=800&auto=format&fit=crop" alt="Football Match" class="match-thumb">
-                    </div>
-                    <div class="match-body">
-                        <h3 class="match-title">Weekend League</h3>
-                        <div class="match-meta">
-                            <span><i class="fas fa-map-marker-alt"></i> Lahore</span>
-                            <span><i class="far fa-calendar"></i> Sat, 4:00 PM</span>
-                        </div>
-                        <div class="pills">
-                            <span class="badge bg-dark text-white me-1">7v7</span>
-                            <span class="badge bg-dark text-white me-1">Grass</span>
-                            <span class="badge bg-success">5 spots left</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="text-success fw-bold">PKR 2,000/player</span>
-                            <a href="#" class="btn btn-sm btn-primary">Book Now</a>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img src="https://images.unsplash.com/photo-1574629810360-7efbbe195d86?q=80&w=800&auto=format&fit=crop" alt="Football Match" class="match-thumb">
-                    </div>
-                    <div class="match-body">
-                        <h3 class="match-title">Friendly Match</h3>
-                        <div class="match-meta">
-                            <span><i class="fas fa-map-marker-alt"></i> Islamabad</span>
-                            <span><i class="far fa-calendar"></i> Tomorrow, 7:00 PM</span>
-                        </div>
-                        <div class="pills">
-                            <span class="badge bg-dark text-white me-1">6v6</span>
-                            <span class="badge bg-dark text-white me-1">Turf</span>
-                            <span class="badge bg-success">4 spots left</span>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center mt-3">
-                            <span class="text-success fw-bold">PKR 1,200/player</span>
-                            <a href="#" class="btn btn-sm btn-primary">Join Now</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    
     <!-- Ticker -->
     <div class="container">
         <div class="ticker">
@@ -715,86 +615,6 @@
                 <span><i class="fas fa-users"></i> Join 50,000+ Football Enthusiasts</span>
                 <span><i class="fas fa-star"></i> 4.8/5 from 2,500+ Reviews</span>
             </div>
-        </div>
-        <div class="muted mb-3">Browse live matches across grounds. Log in only when you hit join.</div>
-        <div class="d-flex gap-2 pills mb-3">
-            <button class="btn pill-light btn-sm">Football</button>
-            <button class="btn pill-light btn-sm">Cricket</button>
-            <button class="btn pill-light btn-sm">Trending</button>
-                        </div>
-        <h5 class="mb-2">Ongoing games</h5>
-        <div class="row-wrap mb-4">
-        <button class="btn btn-outline-light btn-sm position-absolute top-50 start-0 translate-middle-y z-1" id="prevBtn" style="backdrop-filter:blur(6px);">‹</button>
-        <div class="row-scroller" id="ongoingRow">
-            {% if lobby_cards %}
-                {% for c in lobby_cards %}
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img class="match-thumb" src="{{ c.ground.img or 'https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60' }}" alt="{{ c.ground.name }}">
-                        <div class="live-dot"><i></i> Live</div>
-                    </div>
-                    <div class="match-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold">{{ c.ground.name }}</div>
-                                <div class="muted small">{{ c.ground.location }} • {{ c.match.date }} {{ c.match.time }}</div>
-                                <div class="muted small">{{ c.count }}/{{ c.capacity }} joined</div>
-                            </div>
-                            <div>
-                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {% endfor %}
-            {% else %}
-                <!-- Fallback demo cards if no real matches -->
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img class="match-thumb" src="https://images.unsplash.com/photo-1521417531135-83b3ed1d83a1?auto=format&fit=crop&w=1600&q=60" alt="Demo Ground">
-                        <div class="live-dot"><i></i> Live</div>
-                    </div>
-                    <div class="match-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold">Demo Ground</div>
-                                <div class="muted small">Demo Location • 2025-01-18 18:00</div>
-                                <div class="muted small">7/10 joined</div>
-                            </div>
-                            <div>
-                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="match-card">
-                    <div class="match-thumb-wrap">
-                        <img class="match-thumb" src="https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=400&q=80" alt="Demo Ground 2">
-                        <div class="live-dot"><i></i> Live</div>
-                    </div>
-                    <div class="match-body">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-bold">Demo Ground 2</div>
-                                <div class="muted small">Demo Location 2 • 2025-01-18 19:00</div>
-                                <div class="muted small">5/10 joined</div>
-                            </div>
-                            <div>
-                                <a class="btn btn-primary btn-sm cta" href="{{ url_for('grounds') }}">View</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endif %}
-        </div>
-        <button class="btn btn-outline-light btn-sm position-absolute top-50 end-0 translate-middle-y z-1" id="nextBtn" style="backdrop-filter:blur(6px);">›</button>
-        </div>
-        <div class="d-flex gap-2">
-            <a href="{{ url_for('grounds') }}" class="btn btn-primary">Browse grounds</a>
-            {% if not session.get('user_type') %}
-            <a href="{{ url_for('signup_player') }}" class="option-card">👤 <span>Sign up as player</span></a>
-            <a href="{{ url_for('signup_host') }}" class="option-card">🏟️ <span>Sign up as host</span></a>
-            {% endif %}
         </div>
     </div>
 </div>
