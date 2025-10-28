@@ -16,34 +16,125 @@
 {% block extra_css %}
 <style>
     body {
-        background: linear-gradient(135deg, var(--yale-blue-300) 0%, var(--yale-blue-500) 100%);
+        background: linear-gradient(135deg, var(--dark-bg-100) 0%, var(--dark-bg-300) 100%);
         min-height: 100vh;
-        font-family: 'Arial', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        position: relative;
+        overflow-x: hidden;
     }
+    
+    /* Green glow effect */
+    body::before {
+        content: '';
+        position: fixed;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(29, 185, 84, 0.15), transparent 40%),
+            radial-gradient(circle at 80% 70%, rgba(29, 185, 84, 0.1), transparent 40%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
     .login-form {
-        background: var(--lemon-chiffon-900);
-        border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(13,59,102,0.15);
-        padding: 40px;
-        max-width: 400px;
+        background: var(--dark-bg-400);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        padding: 50px;
+        max-width: 450px;
         margin: 100px auto;
-        border: 1px solid rgba(244,211,94,0.3);
+        border: 1px solid rgba(29, 185, 84, 0.2);
+        position: relative;
+        z-index: 1;
+        backdrop-filter: blur(10px);
     }
+    
     .form-title {
-        font-size: 2rem;
-        font-weight: bold;
-        color: var(--yale-blue);
-        margin-bottom: 25px;
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--text-light);
+        margin-bottom: 10px;
         text-align: center;
+        background: linear-gradient(135deg, var(--primary-green), var(--accent-yellow));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
+    
+    .form-subtitle {
+        text-align: center;
+        color: var(--text-muted);
+        margin-bottom: 30px;
+        font-size: 0.95rem;
+    }
+    
+    .form-label {
+        color: var(--text-light);
+        font-weight: 600;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .form-control {
+        background: var(--dark-bg-600);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        padding: 12px 16px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        background: var(--dark-bg-700);
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.1);
+        color: var(--text-light);
+    }
+    
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+    
     .btn-primary {
-        background: var(--yale-blue);
+        background: linear-gradient(135deg, var(--primary-green), #1ed760);
         border: none;
-        color: var(--lemon-chiffon-900);
+        color: var(--text-dark);
+        font-weight: 700;
+        padding: 14px;
+        border-radius: 10px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
     }
+    
     .btn-primary:hover {
-        background: var(--yale-blue-600);
-        color: var(--lemon-chiffon-900);
+        background: linear-gradient(135deg, #1ed760, var(--primary-green));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        color: var(--text-dark);
+    }
+    
+    .login-form a {
+        color: var(--primary-green);
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    
+    .login-form a:hover {
+        color: var(--accent-yellow);
+    }
+    
+    .breadcrumb {
+        background: transparent;
+    }
+    
+    .breadcrumb-item a {
+        color: var(--primary-green);
+    }
+    
+    .breadcrumb-item.active {
+        color: var(--text-muted);
     }
 </style>
 {% endblock %}
@@ -51,6 +142,7 @@
 {% block content %}
 <div class="login-form">
     <div class="form-title">Player Login</div>
+    <p class="form-subtitle">Welcome back! Ready to find your next game?</p>
     <form method="POST">
         <div class="mb-3">
             <label for="email" class="form-label">Email</label>

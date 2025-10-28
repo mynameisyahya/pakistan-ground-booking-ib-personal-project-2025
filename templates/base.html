@@ -10,89 +10,147 @@
     <!-- 🎨 Custom styling with new color palette -->
     <style>
         :root{
-            /* New color palette */
-            --yale-blue: #0d3b66;      /* Primary blue */
-            --yale-blue-100: #030c15;  /* Darkest blue */
-            --yale-blue-200: #05182a;  /* Dark blue */
-            --yale-blue-300: #08243e;  /* Medium dark blue */
-            --yale-blue-400: #0b3053;  /* Medium blue */
-            --yale-blue-500: #0d3b66;  /* Base blue */
-            --yale-blue-600: #1764ad;  /* Light blue */
-            --yale-blue-700: #2e8ce4;  /* Lighter blue */
-            --yale-blue-800: #74b2ed;  /* Very light blue */
-            --yale-blue-900: #b9d9f6;  /* Lightest blue */
+            /* Modern Green & Black Theme */
+            --primary-green: #1db954;    /* Spotify green */
+            --primary-green-100: #0a1e12; /* Darkest green */
+            --primary-green-200: #0e2e1c; /* Darker green */
+            --primary-green-300: #123d26; /* Dark green */
+            --primary-green-400: #174d30; /* Medium dark green */
+            --primary-green-500: #1db954; /* Base green */
+            --primary-green-600: #34c76a; /* Light green */
+            --primary-green-700: #4bd580; /* Lighter green */
+            --primary-green-800: #62e396; /* Very light green */
+            --primary-green-900: #79f1ac; /* Lightest green */
             
-            --lemon-chiffon: #faf0ca;   /* Light cream */
-            --lemon-chiffon-100: #534408; /* Dark brown */
-            --lemon-chiffon-200: #a6880f; /* Medium brown */
-            --lemon-chiffon-300: #ebc326; /* Golden brown */
-            --lemon-chiffon-400: #f3da79; /* Light golden */
-            --lemon-chiffon-500: #faf0ca; /* Base cream */
-            --lemon-chiffon-600: #fbf4d6; /* Lighter cream */
-            --lemon-chiffon-700: #fcf7e0; /* Very light cream */
-            --lemon-chiffon-800: #fdf9ea; /* Almost white cream */
-            --lemon-chiffon-900: #fefcf5; /* Nearly white */
+            --dark-bg: #121212;         /* Dark background */
+            --dark-bg-100: #000000;     /* Pure black */
+            --dark-bg-200: #0a0a0a;     /* Slightly lighter black */
+            --dark-bg-300: #141414;     /* Lighter dark */
+            --dark-bg-400: #1a1a1a;     /* Even lighter dark */
+            --dark-bg-500: #1e1e1e;     /* Base dark */
+            --dark-bg-600: #2a2a2a;     /* Light dark */
+            --dark-bg-700: #363636;     /* Lighter dark */
+            --dark-bg-800: #424242;     /* Very light dark */
+            --dark-bg-900: #4e4e4e;     /* Lightest dark */
             
-            --naples-yellow: #f4d35e;   /* Bright yellow */
-            --naples-yellow-100: #3f3204; /* Dark brown */
-            --naples-yellow-200: #7e6509; /* Medium brown */
-            --naples-yellow-300: #bd970d; /* Light brown */
-            --naples-yellow-400: #efc21e; /* Dark yellow */
-            --naples-yellow-500: #f4d35e; /* Base yellow */
-            --naples-yellow-600: #f6dc7d; /* Light yellow */
-            --naples-yellow-700: #f8e59e; /* Lighter yellow */
-            --naples-yellow-800: #faedbe; /* Very light yellow */
-            --naples-yellow-900: #fdf6df; /* Lightest yellow */
+            --accent-yellow: #ffd700;   /* Gold accent */
+            --accent-yellow-100: #332b00; /* Dark gold */
+            --accent-yellow-200: #665600; /* Medium dark gold */
+            --accent-yellow-300: #998000; /* Medium gold */
+            --accent-yellow-400: #ccab00; /* Light gold */
+            --accent-yellow-500: #ffd700; /* Base gold */
+            --accent-yellow-600: #ffde26; /* Lighter gold */
+            --accent-yellow-700: #ffe44d; /* Very light gold */
+            --accent-yellow-800: #ffeb80; /* Lightest gold */
+            --accent-yellow-900: #fff2b3; /* Pale gold */
             
-            --sandy-brown: #ee964b;     /* Orange brown */
-            --sandy-brown-100: #391d05;  /* Dark brown */
-            --sandy-brown-200: #723b0b;  /* Medium brown */
-            --sandy-brown-300: #ab5810;  /* Light brown */
-            --sandy-brown-400: #e47615;  /* Dark orange */
-            --sandy-brown-500: #ee964b;  /* Base orange */
-            --sandy-brown-600: #f1ab6d;  /* Light orange */
-            --sandy-brown-700: #f5c092;  /* Lighter orange */
-            --sandy-brown-800: #f8d5b6;  /* Very light orange */
-            --sandy-brown-900: #fceadb;  /* Lightest orange */
+            --text-light: #ffffff;      /* White text */
+            --text-muted: #b3b3b3;      /* Muted text */
+            --text-dark: #121212;       /* Dark text */
             
-            --tomato: #f95738;          /* Bright red */
-            --tomato-100: #3b0b02;      /* Dark red */
-            --tomato-200: #771704;      /* Medium red */
-            --tomato-300: #b22206;      /* Light red */
-            --tomato-400: #ed2e07;      /* Dark orange-red */
-            --tomato-500: #f95738;      /* Base red */
-            --tomato-600: #fa7a61;      /* Light red */
-            --tomato-700: #fb9b88;      /* Lighter red */
-            --tomato-800: #fdbdb0;      /* Very light red */
-            --tomato-900: #feded7;      /* Lightest red */
+            --success: #1db954;         /* Success green */
+            --warning: #ffd700;         /* Warning yellow */
+            --danger: #e74c3c;          /* Danger red */
+            --info: #3498db;            /* Info blue */
             
             /* Semantic color mappings */
-            --brand-1: var(--yale-blue);
-            --brand-2: var(--naples-yellow);
-            --accent-1: var(--tomato);
-            --accent-2: var(--sandy-brown);
-            --ink: var(--yale-blue-100);
-            --muted: var(--yale-blue-300);
-            --paper: var(--lemon-chiffon-900);
-            --card: var(--lemon-chiffon-900);
+            --brand-1: var(--primary-green);
+            --brand-2: var(--accent-yellow);
+            --accent-1: var(--accent-yellow);
+            --accent-2: var(--primary-green-600);
+            --ink: var(--text-light);
+            --muted: var(--text-muted);
+            --paper: var(--dark-bg-500);
+            --card: var(--dark-bg-400);
+            --card-hover: var(--dark-bg-600);
         }
-        body{
-            min-height:100vh;
-            background:
-                radial-gradient(1100px 480px at -10% -20%, rgba(13,59,102,.15), transparent),
-                radial-gradient(900px 420px at 110% -10%, rgba(244,211,94,.15), transparent),
-                linear-gradient(180deg,var(--lemon-chiffon-900),var(--lemon-chiffon-700));
-            color:var(--ink);
-            font-family:Poppins,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif
+        body {
+            min-height: 100vh;
+            background: 
+                radial-gradient(circle at 20% 30%, rgba(29, 185, 84, 0.1), transparent 30%),
+                radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.1), transparent 30%),
+                linear-gradient(to bottom, var(--dark-bg-100), var(--dark-bg-300));
+            color: var(--ink);
+            font-family: 'Poppins', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
         }
-        .navbar{background:rgba(250,240,202,.95);backdrop-filter:blur(10px);border-bottom:1px solid rgba(13,59,102,.1)}
-        .navbar-brand{font-weight:900;letter-spacing:.3px;color:var(--yale-blue) !important}
-        .nav-link{color:var(--yale-blue-400) !important}
-        .nav-link:hover{color:var(--yale-blue) !important}
-        .btn-primary{background:var(--yale-blue);border:none;color:var(--lemon-chiffon-900)}
-        .btn-primary:hover{background:var(--yale-blue-600);color:var(--lemon-chiffon-900)}
-        .btn-outline-primary{border:2px solid var(--yale-blue);color:var(--yale-blue);background:transparent}
-        .btn-outline-primary:hover{background:var(--yale-blue);color:var(--lemon-chiffon-900);border-color:var(--yale-blue)}
+        .navbar {
+            background: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(29, 185, 84, 0.2);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+        }
+        .navbar-brand {
+            font-weight: 900;
+            letter-spacing: 1px;
+            color: var(--primary-green) !important;
+            font-size: 1.5rem;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, var(--primary-green), var(--accent-yellow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
+        }
+        .nav-link {
+            color: var(--text-muted) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 0.5rem 1rem;
+        }
+        .nav-link:hover, .nav-link:focus {
+            color: var(--primary-green) !important;
+        }
+        .nav-link:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 50%;
+            background: var(--primary-green);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+        .nav-link:hover:after {
+            width: 80%;
+        }
+        .btn-primary {
+            background: var(--primary-green);
+            border: none;
+            color: var(--text-light);
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
+        }
+        .btn-primary:hover {
+            background: var(--primary-green-600);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        }
+        .btn-outline-primary {
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+            background: transparent;
+            font-weight: 600;
+            padding: 0.5rem 1.5rem;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .btn-outline-primary:hover {
+            background: var(--primary-green);
+            color: var(--text-light);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
+        }
         .btn-outline-light{border-color:rgba(13,59,102,.2);color:var(--yale-blue-400)}
         .btn-outline-light:hover{background:rgba(13,59,102,.08);color:var(--yale-blue)}
         .btn-success{background:var(--yale-blue);border:none;color:var(--lemon-chiffon-900)}
@@ -101,7 +159,19 @@
         .btn-danger:hover{background:var(--tomato-600);color:var(--lemon-chiffon-900)}
         .app-container{max-width:1280px;padding:28px;margin:0 auto}
         .breadcrumb{display:none}
-        .card-clean{background:var(--card);border:1px solid rgba(13,59,102,.08);border-radius:16px;box-shadow:0 8px 28px rgba(13,59,102,.08)}
+        .card-clean {
+            background: var(--card);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+        .card-clean:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(29, 185, 84, 0.2);
+            border-color: rgba(29, 185, 84, 0.2);
+        }
         .fade-in{animation:fade-in .35s ease both}
         @keyframes fade-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     </style>

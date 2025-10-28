@@ -16,45 +16,95 @@
 {% block extra_css %}
 <style>
     body {
-        background: linear-gradient(135deg, var(--yale-blue-200) 0%, var(--yale-blue-400) 100%);
+        background: 
+            radial-gradient(circle at 20% 30%, rgba(29, 185, 84, 0.1), transparent 30%),
+            radial-gradient(circle at 80% 70%, rgba(255, 215, 0, 0.1), transparent 30%),
+            linear-gradient(to bottom, var(--dark-bg-100), var(--dark-bg-300));
         min-height: 100vh;
-        font-family: 'Arial', sans-serif;
+        font-family: 'Poppins', sans-serif;
     }
     .signup-form {
-        background: rgba(250,240,202,0.95);
-        border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(13,59,102,0.15);
+        background: var(--dark-bg-400);
+        border-radius: 20px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         padding: 40px;
-        max-width: 600px;
+        max-width: 650px;
         margin: 60px auto;
-        border: 1px solid rgba(244,211,94,0.3);
+        border: 1px solid rgba(29, 185, 84, 0.2);
     }
     .form-title {
         font-size: 2rem;
         font-weight: bold;
-        color: var(--yale-blue);
+        color: var(--text-light);
         margin-bottom: 25px;
         text-align: center;
+        background: linear-gradient(90deg, var(--primary-green), var(--accent-yellow));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .form-label {
+        color: var(--text-light);
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+        background: var(--dark-bg-600);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        color: var(--text-light);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+    }
+    .form-control:focus, .form-select:focus {
+        background: var(--dark-bg-700);
+        border-color: var(--primary-green);
+        color: var(--text-light);
+        box-shadow: 0 0 0 0.2rem rgba(29, 185, 84, 0.25);
+    }
+    .form-control::placeholder {
+        color: var(--text-muted);
+    }
+    .form-check-input {
+        background-color: var(--dark-bg-600);
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+    .form-check-input:checked {
+        background-color: var(--primary-green);
+        border-color: var(--primary-green);
+    }
+    .form-check-label {
+        color: var(--text-light);
     }
     .btn-primary {
-        background: var(--yale-blue);
+        background: var(--primary-green);
         border: none;
-        color: var(--lemon-chiffon-900);
+        color: var(--text-light);
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 25px;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3);
     }
     .btn-primary:hover {
-        background: var(--yale-blue-600);
-        color: var(--lemon-chiffon-900);
+        background: var(--primary-green-600);
+        color: var(--text-light);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4);
     }
     .location-section {
-        background: rgba(244,211,94,0.1);
-        border-radius: 10px;
-        padding: 20px;
+        background: rgba(29, 185, 84, 0.05);
+        border-radius: 15px;
+        padding: 25px;
         margin: 20px 0;
-        border: 1px solid rgba(244,211,94,0.2);
+        border: 1px solid rgba(29, 185, 84, 0.2);
     }
     .location-section h5 {
-        color: var(--yale-blue);
-        margin-bottom: 15px;
+        color: var(--primary-green);
+        margin-bottom: 20px;
+        font-weight: 700;
     }
     .coordinates-row {
         display: grid;
@@ -63,22 +113,42 @@
     }
     .map-preview {
         height: 200px;
-        border-radius: 8px;
-        border: 1px solid rgba(244,211,94,0.3);
+        border-radius: 12px;
+        border: 1px solid rgba(29, 185, 84, 0.2);
         margin-top: 15px;
-        background: #f8f9fa;
+        background: var(--dark-bg-600);
         display: flex;
         align-items: center;
         justify-content: center;
-        color: var(--yale-blue-400);
+        color: var(--text-muted);
     }
     .btn-outline-secondary {
-        border-color: var(--yale-blue-400);
-        color: var(--yale-blue-400);
+        border: 2px solid var(--primary-green);
+        color: var(--primary-green);
+        background: transparent;
+        font-weight: 600;
+        border-radius: 20px;
+        transition: all 0.3s ease;
     }
     .btn-outline-secondary:hover {
-        background: var(--yale-blue-400);
-        color: var(--lemon-chiffon-900);
+        background: var(--primary-green);
+        color: var(--text-light);
+        border-color: var(--primary-green);
+    }
+    .alert {
+        border-radius: 10px;
+        border: none;
+    }
+    .alert-info {
+        background: rgba(29, 185, 84, 0.1);
+        color: var(--text-light);
+        border: 1px solid rgba(29, 185, 84, 0.2);
+    }
+    .small, small {
+        color: var(--text-muted);
+    }
+    .text-muted {
+        color: var(--text-muted) !important;
     }
 </style>
 {% endblock %}
