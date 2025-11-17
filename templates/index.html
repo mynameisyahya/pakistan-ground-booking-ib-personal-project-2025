@@ -20,7 +20,7 @@
         overflow: hidden;
     }
     
-    /* Dynamic background with subtle green glow */
+    /* Dynamic background with enhanced green glow and grid */
     .bg-scene {
         position: absolute;
         inset: -60px -60px auto -60px;
@@ -35,11 +35,49 @@
         position: absolute;
         inset: 0;
         background: 
-            radial-gradient(60% 60% at 10% 10%, rgba(29, 185, 84, 0.15), transparent 60%),
-            radial-gradient(60% 60% at 90% 20%, rgba(255, 215, 0, 0.12), transparent 60%),
-            radial-gradient(50% 50% at 20% 90%, rgba(0, 0, 0, 0.2), transparent 60%),
-            radial-gradient(50% 50% at 80% 80%, rgba(29, 185, 84, 0.1), transparent 60%),
-            linear-gradient(180deg, var(--dark-bg-100), var(--dark-bg-300));
+            linear-gradient(90deg, transparent 0%, rgba(29, 185, 84, 0.03) 50%, transparent 100%) 0 0 / 60px 100%,
+            linear-gradient(0deg, transparent 0%, rgba(29, 185, 84, 0.03) 50%, transparent 100%) 0 0 / 100% 60px,
+            radial-gradient(60% 60% at 10% 10%, rgba(29, 185, 84, 0.2), transparent 60%),
+            radial-gradient(60% 60% at 90% 20%, rgba(29, 185, 84, 0.15), transparent 60%),
+            radial-gradient(50% 50% at 20% 90%, rgba(0, 0, 0, 0.3), transparent 60%),
+            radial-gradient(50% 50% at 80% 80%, rgba(29, 185, 84, 0.18), transparent 60%),
+            linear-gradient(180deg, #0a0a0a, #121212);
+        background-blend-mode: normal;
+    }
+    
+    .bg-mesh::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: 
+            repeating-linear-gradient(
+                90deg,
+                rgba(29, 185, 84, 0.03) 0px,
+                transparent 1px,
+                transparent 40px,
+                rgba(29, 185, 84, 0.03) 41px
+            ),
+            repeating-linear-gradient(
+                0deg,
+                rgba(29, 185, 84, 0.03) 0px,
+                transparent 1px,
+                transparent 40px,
+                rgba(29, 185, 84, 0.03) 41px
+            );
+        opacity: 0.5;
+    }
+    
+    .bg-mesh::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at 50% 50%, rgba(29, 185, 84, 0.1), transparent 70%);
+        animation: pulse-glow 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulse-glow {
+        0%, 100% { opacity: 0.5; }
+        50% { opacity: 0.8; }
     }
     
     /* Floating elements */
@@ -225,22 +263,241 @@
     
     .option-card:hover {
         background: var(--dark-bg-500);
+        transform: translateY(-8px);
+        box-shadow: 0 20px 50px rgba(29, 185, 84, 0.15);
+        border-color: rgba(29, 185, 84, 0.3);
+    }
+    
+    /* Stats Section */
+    .stats-section {
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.08) 0%, rgba(29, 185, 84, 0.02) 100%);
+        border: 1px solid rgba(29, 185, 84, 0.1);
+        border-radius: 20px;
+        padding: 3rem 2rem;
+        margin: 3rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stats-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, var(--primary-green), transparent);
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1rem;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, var(--primary-green), #1ed760);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 0.5rem;
+        display: block;
+        line-height: 1;
+    }
+    
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    /* CTA Banner */
+    .cta-banner {
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.15) 0%, rgba(29, 185, 84, 0.05) 100%);
+        border: 2px solid rgba(29, 185, 84, 0.2);
+        border-radius: 20px;
+        padding: 3rem 2.5rem;
+        margin: 4rem 0;
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .cta-banner::before {
+        content: '⚽';
+        position: absolute;
+        font-size: 15rem;
+        opacity: 0.03;
+        top: 50%;
+        left: -5%;
+        transform: translateY(-50%) rotate(-15deg);
+        pointer-events: none;
+    }
+    
+    .cta-banner::after {
+        content: '🏆';
+        position: absolute;
+        font-size: 12rem;
+        opacity: 0.03;
+        top: 50%;
+        right: -3%;
+        transform: translateY(-50%) rotate(15deg);
+        pointer-events: none;
+    }
+    
+    .cta-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .cta-subtitle {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        margin-bottom: 2rem;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        position: relative;
+        z-index: 1;
+    }
+    
+    /* Decorative Elements */
+    .section-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(29, 185, 84, 0.3), transparent);
+        margin: 3rem 0;
+        position: relative;
+    }
+    
+    .section-divider::before {
+        content: '⚽';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--dark-bg-300);
+        padding: 0.5rem 1rem;
+        font-size: 1.2rem;
+    }
+    
+    /* How It Works Section */
+    .how-it-works {
+        padding: 4rem 0;
+    }
+    
+    .step-card {
+        background: var(--dark-bg-400);
+        border: 1px solid rgba(29, 185, 84, 0.1);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        position: relative;
+        transition: all 0.3s ease;
+        height: 100%;
+    }
+    
+    .step-card:hover {
         transform: translateY(-5px);
+        border-color: rgba(29, 185, 84, 0.3);
         box-shadow: 0 15px 40px rgba(29, 185, 84, 0.1);
-        border-color: rgba(29, 185, 84, 0.2);
+    }
+    
+    .step-number {
+        width: 70px;
+        height: 70px;
+        background: linear-gradient(135deg, var(--primary-green), #1ed760);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        color: white;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 8px 24px rgba(29, 185, 84, 0.3);
+        position: relative;
+    }
+    
+    .step-number::before {
+        content: '';
+        position: absolute;
+        inset: -5px;
+        border-radius: 50%;
+        border: 2px solid rgba(29, 185, 84, 0.2);
+        animation: pulse-ring 2s ease-out infinite;
+    }
+    
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1.3);
+            opacity: 0;
+        }
+    }
+    
+    .step-card h4 {
+        color: var(--text-light);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        font-size: 1.2rem;
+    }
+    
+    .step-card p {
+        color: var(--text-muted);
+        line-height: 1.6;
+        margin-bottom: 0;
+    }
+    
+    .step-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        display: block;
     }
     
     .option-card i {
-        font-size: 1.5rem;
-        color: var(--primary-green);
-        background: rgba(29, 185, 84, 0.1);
-        width: 50px;
-        height: 50px;
-        border-radius: 12px;
+        font-size: 1.8rem;
+        color: #ffffff;
+        background: linear-gradient(135deg, var(--primary-green) 0%, #1ed760 100%);
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        box-shadow: 
+            0 8px 24px rgba(29, 185, 84, 0.3),
+            0 4px 12px rgba(0, 0, 0, 0.2),
+            inset 0 -2px 8px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .option-card i::before {
+        position: absolute;
+        inset: 0;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, transparent 50%);
+        content: '';
+        pointer-events: none;
+    }
+    
+    .option-card:hover i {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: 
+            0 12px 32px rgba(29, 185, 84, 0.4),
+            0 6px 16px rgba(0, 0, 0, 0.3),
+            inset 0 -2px 8px rgba(0, 0, 0, 0.2);
     }
     
     .option-content h3 {
@@ -286,11 +543,57 @@
         position: relative;
         overflow: hidden;
         border-radius: 20px;
-        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3);
+        box-shadow: 
+            0 24px 70px rgba(0, 0, 0, 0.4),
+            0 0 0 1px rgba(29, 185, 84, 0.2),
+            inset 0 0 60px rgba(29, 185, 84, 0.05);
         height: 60vh;
         min-height: 400px;
         margin-bottom: 2.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(29, 185, 84, 0.2);
+    }
+    
+    .showcase::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: 
+            repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                rgba(29, 185, 84, 0.02) 1px,
+                transparent 2px,
+                transparent 80px
+            ),
+            repeating-linear-gradient(
+                0deg,
+                transparent 0px,
+                rgba(29, 185, 84, 0.02) 1px,
+                transparent 2px,
+                transparent 80px
+            );
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    .showcase::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: 
+            radial-gradient(circle at 30% 40%, rgba(29, 185, 84, 0.15), transparent 40%),
+            radial-gradient(circle at 70% 60%, rgba(29, 185, 84, 0.1), transparent 40%);
+        animation: slow-rotate 20s linear infinite;
+        z-index: 1;
+        pointer-events: none;
+    }
+    
+    @keyframes slow-rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
     
     .showcase-layer {
@@ -298,8 +601,22 @@
         inset: 0;
         background-position: center;
         background-size: cover;
-        filter: saturate(1.1) contrast(1.05);
+        filter: saturate(1.2) contrast(1.1) brightness(0.95);
         animation: slow-pan 30s infinite alternate ease-in-out;
+        z-index: 0;
+    }
+    
+    .showcase-layer::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            135deg,
+            rgba(0, 0, 0, 0.8) 0%,
+            rgba(29, 185, 84, 0.15) 50%,
+            rgba(0, 0, 0, 0.6) 100%
+        );
+        mix-blend-mode: normal;
     }
     
     @keyframes slow-pan {
@@ -311,19 +628,41 @@
         position: absolute;
         inset: auto 0 0 0;
         padding: 2.5rem;
-        background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+        background: linear-gradient(
+            to top,
+            rgba(0, 0, 0, 0.95) 0%,
+            rgba(29, 185, 84, 0.1) 50%,
+            transparent 100%
+        );
         display: flex;
         justify-content: space-between;
         align-items: flex-end;
+        z-index: 2;
+        border-top: 1px solid rgba(29, 185, 84, 0.1);
     }
     
     .showcase-title {
         font-weight: 900;
         font-size: clamp(28px, 4vw, 48px);
         color: white;
-        text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+        text-shadow: 
+            0 0 20px rgba(29, 185, 84, 0.5),
+            0 0 40px rgba(29, 185, 84, 0.3),
+            0 2px 12px rgba(0, 0, 0, 0.8);
         margin: 0;
         line-height: 1.2;
+        position: relative;
+    }
+    
+    .showcase-title::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 0;
+        width: 120px;
+        height: 3px;
+        background: linear-gradient(90deg, rgba(29, 185, 84, 1), transparent);
+        box-shadow: 0 0 10px rgba(29, 185, 84, 0.8);
     }
     
     .showcase-subtitle {
@@ -387,6 +726,65 @@
         transform: none;
     }
     
+    /* Floating Background Decorations */
+    .bg-decoration {
+        position: fixed;
+        pointer-events: none;
+        z-index: 0;
+        opacity: 0.03;
+        font-size: 8rem;
+        animation: float-diagonal 30s infinite ease-in-out;
+    }
+    
+    .bg-decoration:nth-child(1) {
+        top: 10%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+    
+    .bg-decoration:nth-child(2) {
+        top: 60%;
+        right: 8%;
+        animation-delay: 5s;
+        animation-duration: 35s;
+    }
+    
+    .bg-decoration:nth-child(3) {
+        bottom: 15%;
+        left: 10%;
+        animation-delay: 10s;
+        animation-duration: 40s;
+    }
+    
+    @keyframes float-diagonal {
+        0%, 100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        25% {
+            transform: translate(20px, -20px) rotate(5deg);
+        }
+        50% {
+            transform: translate(-15px, 15px) rotate(-5deg);
+        }
+        75% {
+            transform: translate(15px, 20px) rotate(3deg);
+        }
+    }
+    
+    /* Glow effects on scroll */
+    .glow-on-scroll {
+        animation: glow-pulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes glow-pulse {
+        0%, 100% {
+            box-shadow: 0 0 20px rgba(29, 185, 84, 0.1);
+        }
+        50% {
+            box-shadow: 0 0 40px rgba(29, 185, 84, 0.2);
+        }
+    }
+    
     /* Responsive adjustments */
     @media (max-width: 992px) {
         .hero {
@@ -437,11 +835,42 @@
         .option-card {
             padding: 1.25rem;
         }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+        }
+        
+        .cta-title {
+            font-size: 1.8rem;
+        }
+        
+        .cta-subtitle {
+            font-size: 1rem;
+        }
+        
+        .cta-banner {
+            padding: 2rem 1.5rem;
+        }
+        
+        .option-card i {
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+        }
     }
     </style>
 {% endblock %}
 
 {% block content %}
+<!-- Background Decorations -->
+<div class="bg-decoration">⚽</div>
+<div class="bg-decoration">🏆</div>
+<div class="bg-decoration">🥅</div>
+
 <div class="app-container">
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -472,17 +901,14 @@
         
         <!-- Hero Showcase -->
         <div class="showcase">
-            <div class="showcase-layer" style="background-image:url('https://images.unsplash.com/photo-1579954936385-f16e423bcd91?q=80&w=1920&auto=format&fit=crop&h=1080&fit=crop&crop=center');">
-                <!-- Gradient overlay -->
-                <div style="position: absolute; inset: 0; background: linear-gradient(135deg, rgba(18, 18, 18, 0.7) 0%, rgba(18, 18, 18, 0.3) 100%);"></div>
-            </div>
+            <div class="showcase-layer" style="background-image:url('https://images.unsplash.com/photo-1489944440615-453fc2b6a9a9?q=80&w=1920&auto=format&fit=crop');"></div>
             <div class="showcase-content">
                 <div>
                     <h1 class="showcase-title">Find Your Perfect Game</h1>
-                    <p class="showcase-subtitle">Join thousands of players and hosts in Pakistan's largest football community. Book grounds, join matches, and experience the beautiful game like never before.</p>
+                    <p class="showcase-subtitle" style="text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);">Join thousands of players and hosts in Pakistan's largest football community. Book grounds, join matches, and experience the beautiful game like never before.</p>
                     <div class="mt-4">
-                        <a href="{{ url_for('grounds') }}" class="btn btn-primary btn-lg me-3">Browse Grounds</a>
-                        <a href="{{ url_for('signup_player') }}" class="btn btn-outline-light btn-lg">Join Now</a>
+                        <a href="{{ url_for('grounds') }}" class="btn btn-primary btn-lg me-3" style="box-shadow: 0 0 20px rgba(29, 185, 84, 0.4);">Browse Grounds</a>
+                        <a href="{{ url_for('signup_player') }}" class="btn btn-outline-light btn-lg" style="border-color: rgba(29, 185, 84, 0.6); box-shadow: 0 0 15px rgba(29, 185, 84, 0.2);">Join Now</a>
                     </div>
                 </div>
             </div>
@@ -567,6 +993,81 @@
     </div>
     <button class="btn btn-outline-light btn-sm position-absolute top-50 end-0 translate-middle-y z-1" id="nextBtn" style="backdrop-filter:blur(6px);">›</button>
     </div>
+    <!-- Stats Section -->
+    <div class="container stats-section">
+        <div class="row">
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">5,000+</span>
+                    <span class="stat-label">Active Players</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">200+</span>
+                    <span class="stat-label">Verified Grounds</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">10K+</span>
+                    <span class="stat-label">Matches Played</span>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="stat-item">
+                    <span class="stat-number">4.8★</span>
+                    <span class="stat-label">User Rating</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Divider -->
+    <div class="container">
+        <div class="section-divider"></div>
+    </div>
+    
+    <!-- How It Works Section -->
+    <div class="container how-it-works">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold mb-3" style="color: var(--text-light);">How It Works</h2>
+            <p class="lead" style="color: var(--text-muted);">Get started in just 3 simple steps</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <span class="step-icon">🔍</span>
+                    <h4>Browse Grounds</h4>
+                    <p>Explore verified football grounds in your city with detailed information, photos, and real reviews.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <span class="step-icon">📅</span>
+                    <h4>Book Your Slot</h4>
+                    <p>Choose your preferred date and time. Join existing matches or create your own game.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <span class="step-icon">⚽</span>
+                    <h4>Play & Enjoy</h4>
+                    <p>Show up and play! Our smart system balances teams automatically for fair, competitive matches.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Divider -->
+    <div class="container">
+        <div class="section-divider"></div>
+    </div>
+    
     <!-- Features Section -->
     <div class="container py-5">
         <div class="text-center mb-5">
@@ -603,6 +1104,41 @@
                 </div>
             </div>
         </div>
+        
+        <div class="row g-4 mt-2">
+            <div class="col-md-4">
+                <div class="option-card h-100">
+                    <i class="fas fa-shield-alt"></i>
+                    <div class="option-content">
+                        <h3>Secure & Reliable</h3>
+                        <p>Safe payment processing and verified grounds. Play with confidence and peace of mind.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="option-card h-100">
+                    <i class="fas fa-trophy"></i>
+                    <div class="option-content">
+                        <h3>Competitive Matches</h3>
+                        <p>Smart team balancing based on age and skill. Fair, exciting games every time you play.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="option-card h-100">
+                    <i class="fas fa-mobile-alt"></i>
+                    <div class="option-content">
+                        <h3>Mobile Friendly</h3>
+                        <p>Book and manage matches on the go. Responsive design works perfectly on any device.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Section Divider -->
+    <div class="container">
+        <div class="section-divider"></div>
     </div>
     
     <!-- Ticker -->
