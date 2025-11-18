@@ -24,19 +24,20 @@
         width: 96vw;
         max-width: 1200px;
         margin: 40px auto;
-        border: 1.5px solid var(--yale-blue-800);
-        border-radius: 24px;
-        box-shadow: 0 4px 24px rgba(13,59,102,0.08);
-        background: var(--lemon-chiffon-900);
+        border: 2px solid var(--primary-green-400);
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        background: var(--card);
         display: flex;
         flex-direction: row;
         overflow: hidden;
         min-height: 320px;
-        transition: box-shadow 0.2s, border-color 0.2s;
+        transition: all 0.3s ease;
     }
     .ground-card:hover {
-        box-shadow: 0 8px 32px rgba(13,59,102,0.15);
-        border-color: var(--yale-blue-600);
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(13,59,102,0.2);
+        border-color: var(--yale-blue);
     }
     .ground-map-container {
         width: 50vw;
@@ -85,45 +86,89 @@
         width: 100%;
     }
     .ground-title {
-        color: var(--yale-blue-100);
-        font-size: 2rem;
-        font-weight: bold;
+        color: var(--yale-blue-900);
+        font-size: 2.1rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
     }
     .ground-location {
-        color: var(--yale-blue-400);
-        font-size: 1.1rem;
-        margin-bottom: 10px;
+        color: var(--yale-blue-700);
+        font-size: 1.2rem;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
     }
     .ground-address {
-        color: var(--yale-blue-300);
-        font-size: 0.9rem;
-        margin-bottom: 10px;
-        font-style: italic;
+        color: var(--yale-blue-600);
+        font-size: 1rem;
+        margin-bottom: 1rem;
+        line-height: 1.5;
+        max-width: 80%;
     }
     .ground-rate {
-        color: var(--lemon-chiffon-900);
+        color: white;
         background: var(--yale-blue);
-        border-radius: 8px;
-        padding: 8px 18px;
-        font-size: 1.1rem;
-        font-weight: bold;
+        border-radius: 12px;
+        padding: 10px 24px;
+        font-size: 1.3rem;
+        font-weight: 700;
         display: inline-block;
-        margin-top: 18px;
+        margin: 1rem 0;
+        box-shadow: 0 4px 12px rgba(13, 59, 102, 0.2);
+        transition: all 0.3s ease;
+    }
+    .ground-rate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(13, 59, 102, 0.3);
     }
     .btn-publish {
-        background: var(--naples-yellow);
-        color: var(--yale-blue-100);
-        border: none;
-        font-weight: 600;
+        background: var(--primary-green);
+        color: white !important;
+        border: 2px solid var(--primary-green-600) !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        padding: 14px 30px !important;
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
+        box-shadow: 0 4px 15px rgba(29, 185, 84, 0.3) !important;
+        margin: 1.5rem 0 !important;
+        width: 100% !important;
+        max-width: 300px !important;
+        display: block !important;
+        text-align: center !important;
+        text-decoration: none !important;
     }
     .btn-publish:hover {
-        background: var(--naples-yellow-600);
-        color: var(--yale-blue-100);
+        background: var(--primary-green-600) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(29, 185, 84, 0.4) !important;
     }
     .ground-card-new {
-        border: 2px dashed var(--yale-blue-400);
-        background: rgba(244,211,94,0.05);
-        box-shadow: 0 2px 12px rgba(13,59,102,0.05);
+        border: 2px dashed var(--primary-green) !important;
+        background: rgba(29, 185, 84, 0.08) !important;
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15) !important;
+    }
+    
+    /* Published ground card styling */
+    .ground-card-published {
+        border: 2px solid var(--primary-green-400) !important;
+        background: var(--card) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2) !important;
+    }
+    .ground-card-published .ground-title {
+        color: var(--primary-green) !important;
+    }
+    .ground-card-published .ground-location {
+        color: var(--text-light) !important;
+    }
+    .ground-card-published .ground-address {
+        color: var(--text-muted) !important;
+    }
+    .ground-card-published .alert-success {
+        background: rgba(29, 185, 84, 0.15) !important;
+        border-left: 4px solid var(--primary-green) !important;
+        color: var(--primary-green-700) !important;
     }
     @media (max-width: 900px) {
         .ground-card {
@@ -146,7 +191,7 @@
 
 {% block content %}
 <div class="ground-list-section">
-    <h2 class="mb-4 text-center" style="color:var(--yale-blue);font-weight:bold;">My Grounds</h2>
+    <h2 class="mb-4 text-center" style="color: var(--yale-blue-800); font-weight: 800; letter-spacing: -0.5px; text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">My Grounds</h2>
     
     <!-- Unpublished Ground Preview -->
     {% if host_ground %}
@@ -166,12 +211,16 @@
             <div class="ground-address">{{ host_ground.full_address }}</div>
             {% endif %}
             <div class="ground-rate">Rs {{ host_ground.rate }}/hour</div>
-            <div class="alert alert-warning mt-3">
-                <strong>Preview Mode:</strong> This ground is not yet published and visible to players.
+            <div class="alert alert-warning mt-3" style="background: rgba(255, 193, 7, 0.15); border-left: 4px solid var(--naples-yellow); color: var(--yale-blue-900); padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                <i class="fas fa-eye me-2"></i><strong>Preview Mode:</strong> This ground is not yet published and visible to players.
             </div>
-            <form method="POST" action="{{ url_for('publish_ground_action', ground_id=host_ground.id) }}" class="mt-3">
-                <button type="submit" class="btn btn-publish w-100">🚀 Publish Ground</button>
-            </form>
+            <div class="mt-4">
+                <form method="POST" action="{{ url_for('publish_ground_action', ground_id=host_ground.id) }}" class="text-center">
+                    <button type="submit" class="btn-publish">
+                        <i class="fas fa-rocket me-2"></i>PUBLISH GROUND
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
     {% endif %}
@@ -180,7 +229,7 @@
     <div id="grounds-list">
         {% if grounds %}
             {% for ground in grounds %}
-                <div class="card ground-card">
+                <div class="card ground-card ground-card-published">
                     <div class="ground-map-container">
                         <div class="ground-map" id="map-{{ ground.id }}"></div>
                         <div class="map-overlay" onclick="openOpenStreetMap({{ ground.latitude }}, {{ ground.longitude }}, '{{ ground.name }}')">
@@ -196,8 +245,8 @@
                         <div class="ground-address">{{ ground.full_address }}</div>
                         {% endif %}
                         <div class="ground-rate">Rs {{ ground.rate }}/hour</div>
-                        <div class="alert alert-success mt-3">
-                            <strong>Published:</strong> This ground is visible to players.
+                        <div class="alert alert-success mt-3" style="background: rgba(40, 167, 69, 0.15); border-left: 4px solid #28a745; color: #155724; padding: 12px 20px; border-radius: 8px; font-weight: 500;">
+                            <i class="fas fa-check-circle me-2"></i><strong>Published:</strong> This ground is visible to players.
                         </div>
                     </div>
                 </div>

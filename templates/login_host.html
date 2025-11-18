@@ -15,36 +15,39 @@
 
 {% block extra_css %}
 <style>
-    body {
-        background: linear-gradient(135deg, var(--yale-blue-300) 0%, var(--yale-blue-500) 100%);
-        min-height: 100vh;
-        font-family: 'Arial', sans-serif;
-    }
+    /* Match global green/black theme and ensure readability */
     .login-form {
-        background: var(--lemon-chiffon-900);
-        border-radius: 15px;
-        box-shadow: 0 8px 32px rgba(13,59,102,0.15);
+        background: var(--card);
+        border-radius: 16px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         padding: 40px;
-        max-width: 400px;
+        max-width: 420px;
         margin: 100px auto;
-        border: 1px solid rgba(244,211,94,0.3);
+        border: 1px solid rgba(255, 255, 255, 0.06);
     }
     .form-title {
         font-size: 2rem;
-        font-weight: bold;
-        color: var(--yale-blue);
-        margin-bottom: 25px;
+        font-weight: 800;
+        color: var(--primary-green);
+        margin-bottom: 24px;
         text-align: center;
+        letter-spacing: .5px;
     }
-    .btn-primary {
-        background: var(--yale-blue);
-        border: none;
-        color: var(--lemon-chiffon-900);
+    .login-form .form-label { color: var(--muted); font-weight: 600; }
+    .login-form .form-control {
+        background: var(--dark-bg-500);
+        color: var(--ink);
+        border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .btn-primary:hover {
-        background: var(--yale-blue-600);
-        color: var(--lemon-chiffon-900);
+    .login-form .form-control::placeholder { color: #9aa0a6; }
+    .login-form .form-control:focus {
+        border-color: var(--primary-green);
+        box-shadow: 0 0 0 .2rem rgba(29,185,84,.15);
+        color: var(--ink);
+        background: var(--dark-bg-500);
     }
+    .login-form a { color: var(--primary-green); text-decoration: none; }
+    .login-form a:hover { color: var(--primary-green-600); text-decoration: underline; }
 </style>
 {% endblock %}
 
@@ -76,4 +79,4 @@
         {% endif %}
     {% endwith %}
 </div>
-{% endblock %} 
+{% endblock %}
